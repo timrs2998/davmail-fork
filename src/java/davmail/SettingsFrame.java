@@ -29,8 +29,9 @@ public class SettingsFrame extends JFrame {
         final JTextField keepDelayField = new JTextField(Settings.getProperty("davmail.keepDelay"), 4);
         keepDelayField.setToolTipText("Number of days to keep messages in trash");
 
+        boolean allowRemote = "true".equals(Settings.getProperty("davmail.allowRemote"));
         final JCheckBox allowRemoteField = new JCheckBox();
-        allowRemoteField.setSelected(Settings.getBooleanProperty("davmail.allowRemote"));
+        allowRemoteField.setSelected(allowRemote);
         allowRemoteField.setToolTipText("Allow remote connections to the gateway (server mode)");
 
         addSettingComponent(panel, "OWA url: ", urlField);
@@ -44,7 +45,7 @@ public class SettingsFrame extends JFrame {
         panel = new JPanel(new GridLayout(5, 2));
         panel.setBorder(BorderFactory.createTitledBorder("Proxy settings"));
 
-        boolean enableProxy = Settings.getBooleanProperty("davmail.allowRemote");
+        boolean enableProxy = "true".equals(Settings.getProperty("davmail.enableProxy"));
         final JCheckBox enableProxyField = new JCheckBox();
         enableProxyField.setSelected(enableProxy);
         final JTextField httpProxyField = new JTextField(Settings.getProperty("davmail.proxyHost"), 15);
@@ -101,22 +102,6 @@ public class SettingsFrame extends JFrame {
 
         cancel.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent evt) {
-                // reload settings in form
-                urlField.setText(Settings.getProperty("davmail.url"));
-                popPortField.setText(Settings.getProperty("davmail.popPort"));
-                smtpPortField.setText(Settings.getProperty("davmail.smtpPort"));
-                keepDelayField.setText(Settings.getProperty("davmail.keepDelay"));
-                allowRemoteField.setSelected(Settings.getBooleanProperty(("davmail.allowRemote")));
-                boolean enableProxy = Settings.getBooleanProperty("davmail.allowRemote");
-                enableProxyField.setSelected(enableProxy);
-                httpProxyField.setEnabled(enableProxy);
-                httpProxyPortField.setEnabled(enableProxy);
-                httpProxyUserField.setEnabled(enableProxy);
-                httpProxyPasswordField.setEnabled(enableProxy);
-                httpProxyField.setText(Settings.getProperty("davmail.proxyHost"));
-                httpProxyPortField.setText(Settings.getProperty("davmail.proxyPort"));
-                httpProxyUserField.setText(Settings.getProperty("davmail.proxyUser"));
-                httpProxyPasswordField.setText(Settings.getProperty("davmail.proxyPassword"));
                 setVisible(false);
             }
         });

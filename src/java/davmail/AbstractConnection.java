@@ -1,7 +1,6 @@
 package davmail;
 
 import davmail.exchange.ExchangeSession;
-import davmail.tray.DavGatewayTray;
 
 import java.io.BufferedReader;
 import java.io.IOException;
