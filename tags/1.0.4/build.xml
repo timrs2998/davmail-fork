@@ -1,0 +1,68 @@
+<project name="DavMail" default="dist" basedir=".">
+    <property name="version" value="1.0.4"/>
+
+    <path id="classpath">
+        <pathelement location="classes"/>
+        <fileset dir="lib">
+            <include name="*.jar"/>
+        </fileset>
+    </path>
+
+    <target name="clean">
+        <delete dir="target"/>
+        <delete dir="dist"/>
+    </target>
+
+    <target name="init">
+        <mkdir dir="target/classes"/>
+    </target>
+
+    <target name="compile" depends="init">
+        <mkdir dir="target/classes"/>
+        <javac srcdir="src/java" destdir="target/classes" target="1.5">
+            <classpath>
+                <path refid="classpath"/>
+            </classpath>
+        </javac>
+        <copy todir="target/classes">
+            <fileset dir="src/java">
+                <include name="**/*"/>
+                <exclude name="**/*.java"/>
+            </fileset>
+        </copy>
+    </target>
+
+    <target name="dist" depends="compile">
+        <taskdef name="nsis" classname="net.sf.nsisant.Task">
+            <classpath location="lib/nsisant-1.2.jar"/>
+        </taskdef>
+        <delete dir="dist"/>
+        <mkdir dir="dist"/>
+        <jar basedir="target/classes" destfile="dist/davmail.jar"/>
+        <copy todir="dist/lib">
+            <fileset dir="lib">
+                <include name="*.jar"/>
+                <exclude name="nsisant*.jar"/>
+                <exclude name="jsmoothgen-ant.jar"/>
+            </fileset>
+        </copy>
+        <copy file="davmail.sh" todir="dist"/>
+        <taskdef name="jsmoothgen"
+                 classname="net.charabia.jsmoothgen.ant.JSmoothGen"
+                 classpathref="classpath"/>
+        <jsmoothgen project="davmail.jsmooth" skeletonroot="src/jsmooth/skeletons"/>
+        <jsmoothgen project="davmailconsole.jsmooth" skeletonroot="src/jsmooth/skeletons"/>
+        <zip file="dist/davmail-${version}.zip">
+            <fileset dir="dist">
+                <include name="lib/*.jar"/>
+                <include name="*.jar"/>
+                <include name="davmail*.exe"/>
+                <include name="davmail.sh"/>
+            </fileset>
+        </zip>
+        <nsis script="davmail-setup.nsi" verbosity="4" out="build.log" noconfig="yes">
+            <define name="VERSION" value="${version}"/>
+        </nsis>
+    </target>
+
+</project>
