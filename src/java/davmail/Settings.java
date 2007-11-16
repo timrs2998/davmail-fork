@@ -19,7 +19,7 @@ public class Settings {
     public static synchronized void setConfigFilePath(String value) {
         configFilePath = value;
     }
-
+    
     public static boolean isFirstStart() {
         return isFirstStart;
     }
@@ -105,7 +105,13 @@ public class Settings {
     }
 
     public static synchronized boolean getBooleanProperty(String property) {
-        String propertyValue = SETTINGS.getProperty(property);
-        return "true".equals(propertyValue);
+        boolean value = false;
+        try {
+            String propertyValue = SETTINGS.getProperty(property);
+            value = "true".equals(propertyValue);
+        } catch (NumberFormatException e) {
+            DavGatewayTray.error("Invalid setting value in " + property, e);
+        }
+        return value;
     }
 }

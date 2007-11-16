@@ -141,30 +141,24 @@ public class ExchangeSession {
         // do not send basic auth automatically
         httpClient.getState().setAuthenticationPreemptive(false);
 
-        boolean enableProxy = Settings.getBooleanProperty("davmail.enableProxy");
+        String enableProxy = Settings.getProperty("davmail.enableProxy");
         String proxyHost = null;
-        int proxyPort = 0;
+        String proxyPort = null;
         String proxyUser = null;
         String proxyPassword = null;
 
-        if (enableProxy) {
+        if ("true".equals(enableProxy)) {
             proxyHost = Settings.getProperty("davmail.proxyHost");
-            proxyPort = Settings.getIntProperty("davmail.proxyPort");
+            proxyPort = Settings.getProperty("davmail.proxyPort");
             proxyUser = Settings.getProperty("davmail.proxyUser");
             proxyPassword = Settings.getProperty("davmail.proxyPassword");
         }
 
         // configure proxy
         if (proxyHost != null && proxyHost.length() > 0) {
-            httpClient.getHostConfiguration().setProxy(proxyHost, proxyPort);
+            httpClient.getHostConfiguration().setProxy(proxyHost, Integer.parseInt(proxyPort));
             if (proxyUser != null && proxyUser.length() > 0) {
-
-/*              // Only available in newer HttpClient releases, not compatible with slide library
-                List authPrefs = new ArrayList();
-                authPrefs.add(AuthPolicy.BASIC);
-                httpClient.getParams().setParameter(AuthPolicy.AUTH_SCHEME_PRIORITY,authPrefs);
-*/
-                // instead detect ntlm authentication (windows domain name in user name)
+                // detect ntlm authentication (windows domain name in user name)
                 int backslashindex = proxyUser.indexOf("\\");
                 if (backslashindex > 0) {
                     httpClient.getState().setProxyCredentials(null, proxyHost,
@@ -235,6 +229,12 @@ public class ExchangeSession {
             // get the internal HttpClient instance
             HttpClient httpClient = wdr.retrieveSessionInstance();
 
+/*          // Only available in newer HttpClient releases, not compatible with slide library
+            List authPrefs = new ArrayList();
+            authPrefs.add(AuthPolicy.BASIC);
+            httpClient.getParams().setParameter(AuthPolicy.AUTH_SCHEME_PRIORITY,authPrefs);
+*/
+
             configureClient(httpClient);
 
             // get webmail root url (will follow redirects)
@@ -243,7 +243,7 @@ public class ExchangeSession {
             wdr.executeHttpRequestMethod(httpClient,
                     initmethod);
             if (initmethod.getPath().indexOf("exchweb/bin") > 0) {
-                LOGGER.debug("Form based authentication detected");
+                LOGGER.debug("** Form based authentication detected");
 
                 PostMethod logonMethod = new PostMethod(
                         "/exchweb/bin/auth/owaauth.dll?" +
@@ -288,17 +288,18 @@ public class ExchangeSession {
             String body = method.getResponseBodyAsString();
             int beginIndex = body.indexOf(url);
             if (beginIndex < 0) {
-                throw new HttpException(url + " not found in body");
+                throw new HttpException(url + "not found in body");
             }
             body = body.substring(beginIndex);
             int endIndex = body.indexOf('"');
             if (endIndex < 0) {
-                throw new HttpException(url + " not found in body");
+                throw new HttpException(url + "not found in body");
             }
             body = body.substring(url.length(), endIndex);
             // got base http mailbox http url
             mailPath = "/exchange/" + body;
             wdr.setPath(mailPath);
+//            wdr.propfindMethod(0);
 
             // Retrieve inbox and trash URLs
             Vector<String> reqProps = new Vector<String>();
@@ -307,15 +308,15 @@ public class ExchangeSession {
             reqProps.add("urn:schemas:httpmail:sendmsg");
             reqProps.add("urn:schemas:httpmail:drafts");
 
-            Enumeration foldersEnum = wdr.propfindMethod(0, reqProps);
-            if (!foldersEnum.hasMoreElements()) {
-                throw new IOException("Unable to get mail folders");
+            Enumeration inboxEnum = wdr.propfindMethod(0, reqProps);
+            if (!inboxEnum.hasMoreElements()) {
+                throw new IOException("Unable to get inbox");
             }
-            ResponseEntity inboxResponse = (ResponseEntity) foldersEnum.
+            ResponseEntity inboxResponse = (ResponseEntity) inboxEnum.
                     nextElement();
             Enumeration inboxPropsEnum = inboxResponse.getProperties();
             if (!inboxPropsEnum.hasMoreElements()) {
-                throw new IOException("Unable to get mail folders");
+                throw new IOException("Unable to get inbox");
             }
             while (inboxPropsEnum.hasMoreElements()) {
                 Property inboxProp = (Property) inboxPropsEnum.nextElement();
@@ -342,8 +343,6 @@ public class ExchangeSession {
             LOGGER.debug("Inbox URL : " + inboxUrl);
             LOGGER.debug("Trash URL : " + deleteditemsUrl);
             LOGGER.debug("Send URL : " + sendmsgUrl);
-            LOGGER.debug("Drafts URL : " + draftsUrl);
-            // TODO : sometimes path, sometimes Url ?
             deleteditemsUrl = URIUtil.getPath(deleteditemsUrl);
             wdr.setPath(URIUtil.getPath(inboxUrl));
 
@@ -377,6 +376,7 @@ public class ExchangeSession {
             LOGGER.error(message.toString());
             throw new IOException(message.toString());
         }
+
     }
 
     /**
@@ -479,10 +479,12 @@ public class ExchangeSession {
     public Message getMessage(String messageUrl) throws IOException {
 
         // TODO switch according to Log4J log level
-        //wdr.setDebug(4);
-        //wdr.propfindMethod(messageUrl, 0);
+
+        wdr.setDebug(4);
+        wdr.propfindMethod(messageUrl, 0);
+
         Enumeration messageEnum = wdr.propfindMethod(messageUrl, 0, MESSAGE_REQUEST_PROPERTIES);
-        //wdr.setDebug(0);
+        wdr.setDebug(0);
 
         // 201 created in some cases ?!?
         if ((wdr.getStatusCode() != HttpURLConnection.HTTP_OK && wdr.getStatusCode() != HttpURLConnection.HTTP_CREATED)
@@ -498,11 +500,11 @@ public class ExchangeSession {
 
     public List<Message> getAllMessages() throws IOException {
         List<Message> messages = new ArrayList<Message>();
-        //wdr.setDebug(4);
-        //wdr.propfindMethod(currentFolderUrl, 1);
-        // one level search
+        wdr.setDebug(4);
+        wdr.propfindMethod(currentFolderUrl, 1);
+
         Enumeration folderEnum = wdr.propfindMethod(currentFolderUrl, 1, MESSAGE_REQUEST_PROPERTIES);
-        //wdr.setDebug(0);
+        wdr.setDebug(0);
         while (folderEnum.hasMoreElements()) {
             ResponseEntity entity = (ResponseEntity) folderEnum.nextElement();
 
@@ -531,7 +533,7 @@ public class ExchangeSession {
 
         Calendar cal = Calendar.getInstance();
         cal.add(Calendar.DAY_OF_MONTH, -keepDelay);
-        LOGGER.debug("Delete messages in trash since " + cal.getTime());
+        LOGGER.debug("Keep message not before " + cal.getTime());
         long keepTimestamp = cal.getTimeInMillis();
 
         Vector<String> deleteRequestProperties = new Vector<String>();
@@ -590,7 +592,6 @@ public class ExchangeSession {
                 subject = subject.replaceAll("/", "_xF8FF_");
                 // '?' is also invalid
                 subject = subject.replaceAll("\\?", "");
-                // TODO : test & in subject
             }
         }
 
@@ -606,15 +607,6 @@ public class ExchangeSession {
 
     }
 
-    /**
-     * Select current folder.
-     * Folder name can be logical names INBOX or TRASH (translated to local names),
-     * relative path to user base folder or absolute path.
-     *
-     * @param folderName folder name
-     * @return Folder object
-     * @throws IOException when unable to change folder
-     */
     public Folder selectFolder(String folderName) throws IOException {
         Folder folder = new Folder();
         folder.folderUrl = null;
@@ -633,7 +625,6 @@ public class ExchangeSession {
         reqProps.add("urn:schemas:httpmail:unreadcount");
         reqProps.add("DAV:childcount");
         Enumeration folderEnum = wdr.propfindMethod(folder.folderUrl, 0, reqProps);
-
         if (folderEnum.hasMoreElements()) {
             ResponseEntity entity = (ResponseEntity) folderEnum.nextElement();
             Enumeration propertiesEnum = entity.getProperties();
@@ -648,7 +639,7 @@ public class ExchangeSession {
             }
 
         } else {
-            throw new IOException("Folder not found: " + folder.folderUrl);
+            throw new IOException("Folder not found :" + folder.folderUrl);
         }
         currentFolderUrl = folder.folderUrl;
         return folder;
@@ -683,7 +674,7 @@ public class ExchangeSession {
         public String subject;
         public String priority;
 
-        protected List<Attachment> attachments;
+        protected Map<String, Attachment> attachmentsMap;
 
         // attachment index used during write
         protected int attachmentIndex;
@@ -713,8 +704,7 @@ public class ExchangeSession {
                         Date parsedDate = dateParser.parse(date);
                         date = dateFormatter.format(parsedDate);
                     }
-                    fullHeaders = "Skipped header\n" +
-                            getReceived() +
+                    fullHeaders = "Skipped header\n" + getReceived() +
                             "MIME-Version: 1.0\n" +
                             "Content-Type: application/ms-tnef;\n" +
                             "\tname=\"winmail.dat\"\n" +
@@ -745,7 +735,8 @@ public class ExchangeSession {
             BufferedReader reader = null;
             try {
                 reader = new BufferedReader(new StringReader(fullHeaders));
-                String line = reader.readLine();
+                String line;
+                line = reader.readLine();
                 while (line != null && line.length() > 0) {
                     // patch exchange Content type
                     if (line.equals(CONTENT_TYPE_HEADER + "application/ms-tnef;")) {
@@ -788,28 +779,40 @@ public class ExchangeSession {
                             .append("\nContent-Transfer-Encoding: 7bit")
                             .append("\n\n");
 
-                    for (Attachment attachment : attachments) {
-                        String attachmentContentType = getAttachmentContentType(attachment.href);
-                        String attachmentContentEncoding = "base64";
-                        if (attachmentContentType.startsWith("text/")) {
-                            attachmentContentEncoding = "quoted-printable";
-                        } else if (attachmentContentType.startsWith("message/rfc822")) {
-                            attachmentContentEncoding = "7bit";
+                    for (String attachmentName : attachmentsMap.keySet()) {
+                        // ignore indexed attachments
+                        int parsedAttachmentIndex = 0;
+                        try {
+                            parsedAttachmentIndex = Integer.parseInt(attachmentName);
+                        } catch (Exception e) {
+                            if (LOGGER.isDebugEnabled()) {
+                                LOGGER.debug("Current attachment name " + attachmentName + " is not an index", e);
+                            }
                         }
+                        if (parsedAttachmentIndex == 0) {
+                            Attachment attachment = attachmentsMap.get(attachmentName);
+                            String attachmentContentType = getAttachmentContentType(attachment.href);
+                            String attachmentContentEncoding = "base64";
+                            if (attachmentContentType.startsWith("text/")) {
+                                attachmentContentEncoding = "quoted-printable";
+                            } else if (attachmentContentType.startsWith("message/rfc822")) {
+                                attachmentContentEncoding = "7bit";
+                            }
 
-                        result.append("\n--").append(boundary)
-                                .append("\nContent-Type: ")
-                                .append(attachmentContentType)
-                                .append(";")
-                                .append("\n\tname=\"").append(attachment.name).append("\"");
-                        if (attachment.contentid != null) {
-                            result.append("\nContent-ID: <")
-                                    .append(attachment.contentid)
-                                    .append(">");
+                            result.append("\n--").append(boundary)
+                                    .append("\nContent-Type: ")
+                                    .append(attachmentContentType)
+                                    .append(";")
+                                    .append("\n\tname=\"").append(attachmentName).append("\"");
+                            if (attachment.contentid != null) {
+                                result.append("\nContent-ID: <")
+                                        .append(attachment.contentid)
+                                        .append(">");
+                            }
+
+                            result.append("\nContent-Transfer-Encoding: ").append(attachmentContentEncoding)
+                                    .append("\n\n");
                         }
-
-                        result.append("\nContent-Transfer-Encoding: ").append(attachmentContentEncoding)
-                                .append("\n\n");
                     }
 
                     // end parts
@@ -887,10 +890,9 @@ public class ExchangeSession {
 
                 // detect part boundary start
                 if (line.equals(mimeHeader.boundary)) {
-                    Attachment currentAttachment;
+                    Attachment currentAttachment = attachmentsMap.get(String.valueOf(attachmentIndex));
                     String currentAttachmentName = null;
-                    if (attachmentIndex > 0 && attachmentIndex <= attachments.size()) {
-                        currentAttachment = attachments.get(attachmentIndex - 1);
+                    if (currentAttachment != null) {
                         currentAttachmentName = currentAttachment.name;
                     }
 
@@ -908,7 +910,36 @@ public class ExchangeSession {
                         attachmentIndex++;
                         writeBody(os, partHeader);
                     } else {
-                        Attachment attachment = getAttachment(partHeader, attachmentIndex - 1);
+                        Attachment attachment = attachmentsMap.get(partHeader.name);
+
+                        // TODO : test if .eml extension could be stripped from attachment name directly
+                        // try to get email attachment with .eml extension
+                        if (attachment == null && partHeader.name != null) {
+                            attachment = attachmentsMap.get(partHeader.name + ".eml");
+                        }
+                        // try to get attachment by index, only if no name found
+                        // or attachment renamed to winmail.dat by Exchange
+                        if (attachment == null && (partHeader.name == null || "winmail.dat".equals(partHeader.name))) {
+                            attachment = attachmentsMap.get(String.valueOf(attachmentIndex));
+                        }
+                        // try to get attachment by content id
+                        if (attachment == null && partHeader.contentId != null) {
+                            for (Attachment entry : attachmentsMap.values()) {
+                                if (partHeader.contentId.equals(entry.contentid)) {
+                                    attachment = entry;
+                                }
+                            }
+                        }
+                        // try to get by index if attachment renamed to application
+                        if (attachment == null && partHeader.name != null) {
+                            if (currentAttachment != null && currentAttachment.name.startsWith("application")) {
+                                attachment = currentAttachment;
+                            }
+                        }
+                        // try to get attachment with Content-Disposition header
+                        if (attachment == null && partHeader.fileName != null) {
+                            attachment = attachmentsMap.get(partHeader.fileName);
+                        }
 
                         attachmentIndex++;
                         if (attachment == null) {
@@ -958,12 +989,13 @@ public class ExchangeSession {
                 } catch (MessagingException e) {
                     throw new IOException(e + " " + e.getMessage());
                 }
+                String decodedPath = URIUtil.decode(attachment.href);
 
                 if ("message/rfc822".equalsIgnoreCase(mimeHeader.contentType)) {
                     String messageAttachmentPath = null;
 
                     // Get real attachment path from owa page content
-                    GetMethod method = new GetMethod(URIUtil.encodePath(attachment.href));
+                    GetMethod method = new GetMethod(URIUtil.encodePath(decodedPath));
                     wdr.retrieveSessionInstance().executeMethod(method);
                     String body = method.getResponseBodyAsString();
                     final String URL_DECLARATION = "var g_szURL\t= \"";
@@ -985,7 +1017,7 @@ public class ExchangeSession {
                     attachedMessage.write(quotedOs);
                 } else {
 
-                    GetMethod method = new GetMethod(URIUtil.encodePath(attachment.href));
+                    GetMethod method = new GetMethod(URIUtil.encodePath(decodedPath));
                     wdr.retrieveSessionInstance().executeMethod(method);
 
                     // encode attachment
@@ -1019,26 +1051,7 @@ public class ExchangeSession {
         protected void writeBody(OutputStream os, MimeHeader mimeHeader) throws IOException {
             OutputStream quotedOs;
             try {
-                // double dot filter : avoid end of message in body
-                quotedOs = new FilterOutputStream(os) {
-                    byte state = 0;
-                    public void write(int achar) throws IOException {
-                            if (achar == 13 && state != 3) {
-                                state = 1;
-                            } else if (achar == 10 && state == 1) {
-                                state = 2;
-                            } else if (achar == '.' && state == 2) {
-                                state = 3;
-                            } else if (achar == 13) {
-                                state = 0;
-                                super.write('.');
-                            } else {
-                                state = 0;
-                            }
-                            super.write(achar);
-                    }
-                };
-                quotedOs = (MimeUtility.encode(quotedOs, mimeHeader.contentTransferEncoding));
+                quotedOs = (MimeUtility.encode(os, mimeHeader.contentTransferEncoding));
             } catch (MessagingException e) {
                 throw new IOException(e + " " + e.getMessage());
             }
@@ -1092,7 +1105,31 @@ public class ExchangeSession {
             // TODO : refactor
             String destination = deleteditemsUrl + messageUrl.substring(messageUrl.lastIndexOf("/"));
             LOGGER.debug("Deleting : " + messageUrl + " to " + destination);
+/*
+// first try without webdav library
+            GetMethod moveMethod = new GetMethod(URIUtil.encodePathQuery(messageUrl)) {
+                public String getName() {
+                    return "MOVE";
+                }
+            };
+            moveMethod.addRequestHeader("Destination", URIUtil.encodePathQuery(destination));
+            moveMethod.addRequestHeader("Overwrite", "F");
+            wdr.retrieveSessionInstance().executeMethod(moveMethod);
+            if (moveMethod.getStatusCode() == 412) {
+                int count = 2;
+                // name conflict, try another name
+                while (wdr.getStatusCode() == 412) {
+                    moveMethod = new GetMethod(URIUtil.encodePathQuery(messageUrl)) {
+                        public String getName() {
+                            return "MOVE";
+                        }
+                    };
+                    moveMethod.addRequestHeader("Destination", URIUtil.encodePathQuery(destination.substring(0, destination.lastIndexOf('.')) + "-" + count++ + ".eml"));
+                    moveMethod.addRequestHeader("Overwrite", "F");
+                }
 
+            }
+            */
             wdr.moveMethod(messageUrl, destination);
             if (wdr.getStatusCode() == HttpURLConnection.HTTP_PRECON_FAILED) {
                 int count = 2;
@@ -1103,6 +1140,7 @@ public class ExchangeSession {
             }
 
             LOGGER.debug("Deleted to :" + destination + " " + wdr.getStatusCode() + " " + wdr.getStatusMessage());
+
         }
 
         public void printHeaders(OutputStream os) throws IOException {
@@ -1164,12 +1202,8 @@ public class ExchangeSession {
                 throw new RuntimeException("Exception retrieving " + attachmentUrl + " : " + e + " " + e.getCause());
             }
             // fix content type for known extension
-            if ("application/octet-stream".equalsIgnoreCase(result)) {
-                if (attachmentUrl.endsWith(".pdf") || attachmentUrl.endsWith(".PDF")) {
-                    result = "application/pdf";
-                } else if (attachmentUrl.endsWith(".zip") || attachmentUrl.endsWith(".ZIP")) {
-                    result = "application/zip";
-                }
+            if ("application/octet-stream".equalsIgnoreCase(result) && attachmentUrl.endsWith(".pdf")) {
+                result = "application/pdf";
             }
             return result;
 
@@ -1210,7 +1244,7 @@ public class ExchangeSession {
 
         public void loadAttachments() throws IOException {
             // do not load attachments twice
-            if (attachments == null) {
+            if (attachmentsMap == null) {
 
                 GetMethod getMethod = new GetMethod(URIUtil.encodePathQuery(messageUrl + "?Cmd=Open&unfiltered=1"));
                 wdr.retrieveSessionInstance().executeMethod(getMethod);
@@ -1223,7 +1257,7 @@ public class ExchangeSession {
                 // Release the connection.
                 getMethod.releaseConnection();
 
-                attachments = new ArrayList<Attachment>();
+                attachmentsMap = new HashMap<String, Attachment>();
                 int attachmentIndex = 1;
                 // fix empty body in dsn report
                 if (body == null || body.length() == 0) {
@@ -1275,8 +1309,10 @@ public class ExchangeSession {
                             attachment.name = attachmentName;
                             attachment.href = attachmentHref;
 
-                            attachments.add(attachment);
-                            LOGGER.debug("Attachment " + (attachmentIndex++) + " : " + attachmentName);
+                            attachmentsMap.put(attachmentName, attachment);
+                            LOGGER.debug("Attachment " + attachmentIndex + " : " + attachmentName);
+                            // add a second count based map entry
+                            attachmentsMap.put(String.valueOf(attachmentIndex++), attachment);
                         } else {
                             LOGGER.warn("Message URL : " + messageUrl + " is not a substring of attachment URL : " + attachmentHref);
                         }
@@ -1355,7 +1391,7 @@ public class ExchangeSession {
                                 }
                                 // add only inline images
                                 if (attachment.contentid != null) {
-                                    attachments.add(attachment);
+                                    attachmentsMap.put(attachmentName, attachment);
                                 }
                                 LOGGER.debug("Inline image attachment ID:" + attachment.contentid
                                         + " name: " + attachment.name + " href: " + attachment.href);
@@ -1367,44 +1403,7 @@ public class ExchangeSession {
             }
         }
 
-
-        protected Attachment getAttachment(MimeHeader partHeader, int attachmentIndex) {
-            Attachment attachment = null;
-
-            for (Attachment currentAttachment : attachments) {
-                if ((partHeader.name != null && partHeader.name.equals(currentAttachment.name)) ||
-                        // TODO : test if .eml extension could be stripped from attachment name directly
-                        // try to get email attachment with .eml extension
-                        (partHeader.name != null && (partHeader.name + ".eml").equals(currentAttachment.name)) ||
-                        // try to get attachment by content id
-                        (partHeader.contentId != null && partHeader.contentId.equals(currentAttachment.contentid)) ||
-                        // try to get attachment with Content-Disposition header
-                        (partHeader.fileName != null && partHeader.fileName.equals(currentAttachment.name))
-                        ) {
-                    attachment = currentAttachment;
-                    break;
-                }
-            }
-
-            // try to get attachment by index, only if no name found
-            // or attachment renamed to winmail.dat by Exchange
-            if (attachment == null && (partHeader.name == null || "winmail.dat".equals(partHeader.name))
-                // avoid out of bounds exception
-                && attachmentIndex >= 0 && attachmentIndex < attachments.size()) {
-                attachment = attachments.get(attachmentIndex);
-            }
-
-            // try to get by index if attachment renamed to application
-            if (attachment == null && partHeader.name != null) {
-                Attachment currentAttachment = attachments.get(attachmentIndex);
-                if (currentAttachment != null && currentAttachment.name.startsWith("application")) {
-                    attachment = currentAttachment;
-                }
-            }
-            return attachment;
-        }
     }
-
 
     class Attachment {
         /**
