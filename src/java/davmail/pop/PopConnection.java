@@ -35,13 +35,6 @@ public class PopConnection extends AbstractConnection {
         return result;
     }
 
-    public void printCapabilities() throws IOException {
-        sendClient("TOP");
-        sendClient("USER");
-        sendClient("UIDL");
-        sendClient(".");
-    }
-
     public void printList() throws IOException {
         int i = 1;
         for (ExchangeSession.Message message : messages) {
@@ -118,40 +111,26 @@ public class PopConnection extends AbstractConnection {
                             } catch (Exception e) {
                                 String message = e.getMessage();
                                 if (message == null) {
-                                    message = "Authentication failed: "+e.toString();
+                                    message = e.toString();
                                 }
                                 DavGatewayTray.error(message);
                                 message = message.replaceAll("\\n", " ");
-                                sendERR(message);
+                                sendERR("authentication failed : " + message);
                             }
                         }
                     } else if ("CAPA".equalsIgnoreCase(command)) {
-                        sendOK("Capability list follows");
-                        printCapabilities();
+                        sendERR("unknown command");
                     } else if (state != AUTHENTICATED) {
-                        sendERR("Invalid state not authenticated");
+                        sendERR("invalid state not authenticated");
                     } else {
                         if ("STAT".equalsIgnoreCase(command)) {
                             sendOK(messages.size() + " " +
                                     getTotalMessagesLength());
                         } else if ("LIST".equalsIgnoreCase(command)) {
-                            if (tokens.hasMoreTokens()) {
-                                String token = tokens.nextToken();
-                                try {
-                                    int messageNumber = Integer.valueOf(token);
-                                    ExchangeSession.Message message = messages.get(messageNumber-1);
-                                    sendOK(""+messageNumber+" "+message.size);
-                                } catch (NumberFormatException e) {
-                                    sendERR("Invalid message index: "+token);
-                                } catch (ArrayIndexOutOfBoundsException e) {
-                                    sendERR("Invalid message index: "+token);
-                                }
-                            } else {
-                                sendOK(messages.size() +
-                                        " messages (" + getTotalMessagesLength() +
-                                        " octets)");
-                                printList();
-                            }
+                            sendOK(messages.size() +
+                                    " messages (" + getTotalMessagesLength() +
+                                    " octets)");
+                            printList();
                         } else if ("UIDL".equalsIgnoreCase(command)) {
                             sendOK(messages.size() +
                                     " messages (" + getTotalMessagesLength() +
