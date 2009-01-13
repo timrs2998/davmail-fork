@@ -1,0 +1,143 @@
+<project name="DavMail" default="dist" basedir=".">
+    <property name="version" value="2.1.1"/>
+
+    <path id="classpath">
+        <pathelement location="classes"/>
+        <fileset dir="lib">
+            <include name="*.jar"/>
+        </fileset>
+    </path>
+
+    <target name="clean">
+        <delete dir="target"/>
+        <delete dir="dist"/>
+    </target>
+
+    <target name="init">
+        <condition property="is.windows">
+            <os family="windows"/>
+        </condition>
+        <mkdir dir="target/classes"/>
+    </target>
+
+    <target name="compile" depends="init">
+        <mkdir dir="target/classes"/>
+        <javac srcdir="src/java" destdir="target/classes" source="1.5" target="1.5">
+            <classpath>
+                <path refid="classpath"/>
+            </classpath>
+        </javac>
+        <copy todir="target/classes">
+            <fileset dir="src/java">
+                <include name="**/*"/>
+                <exclude name="**/*.java"/>
+            </fileset>
+        </copy>
+    </target>
+
+    <target name="dist-nsis" if="is.windows">
+        <taskdef name="nsis" classname="net.sf.nsisant.Task">
+            <classpath location="lib/nsisant-1.2.jar"/>
+        </taskdef>
+        <nsis script="davmail-setup.nsi" verbosity="4" out="build.log" noconfig="yes">
+            <define name="VERSION" value="${version}"/>
+        </nsis>
+    </target>
+
+    <target name="dist" depends="compile">
+        <delete dir="dist"/>
+        <mkdir dir="dist"/>
+        <echo file="dist/version.txt" message="${version}"/>
+        <jar basedir="target/classes" destfile="dist/davmail.jar">
+            <manifest>
+                <section name="davmail/">
+                    <attribute name="Implementation-Title" value="DavMail Gateway"/>
+                    <attribute name="Implementation-Version" value="${version}"/>
+                    <attribute name="Implementation-Vendor" value="Mickael Guessant"/>
+                </section>
+            </manifest>
+        </jar>
+        <copy todir="dist/lib">
+            <fileset dir="lib">
+                <include name="*.jar"/>
+                <exclude name="nsisant*.jar"/>
+                <exclude name="jsmoothgen-ant.jar"/>
+                <exclude name="servlet-api.jar"/>
+            </fileset>
+        </copy>
+        <copy file="davmail.sh" todir="dist"/>
+        <copy file="davmail.desktop" todir="dist"/>
+        <taskdef name="jsmoothgen"
+                 classname="net.charabia.jsmoothgen.ant.JSmoothGen"
+                 classpathref="classpath"/>
+        <jsmoothgen project="davmail.jsmooth" skeletonroot="src/jsmooth/skeletons"/>
+        <jsmoothgen project="davmailconsole.jsmooth" skeletonroot="src/jsmooth/skeletons"/>
+        <zip file="dist/davmail-${version}.zip">
+            <fileset dir="dist">
+                <include name="lib/*.jar"/>
+                <include name="*.jar"/>
+                <include name="davmail.desktop"/>
+                <include name="davmail.sh"/>
+                <!-- exclude swt jars from platform independent package -->
+                <exclude name="lib/swt*.jar"/>
+            </fileset>
+        </zip>
+        <copy todir="dist/web">
+            <fileset dir="src/web"/>
+        </copy>
+        <copy todir="dist/web/WEB-INF/lib">
+            <fileset dir="dist">
+                <include name="*.jar"/>
+            </fileset>
+            <fileset dir="dist/lib">
+                <include name="*.jar"/>
+                <exclude name="nsisant*.jar"/>
+                <exclude name="jsmoothgen-ant*.jar"/>
+                <exclude name="swt*.jar"/>
+            </fileset>
+        </copy>
+        <jar destfile="dist/davmail-${version}.war">
+            <fileset dir="dist/web"/>
+        </jar>
+        <tar tarfile="dist/davmail-linux-x86-${version}.tgz" compression="gzip">
+            <tarfileset prefix="davmail-linux-x86-${version}" dir="dist" filemode="755">
+                <include name="davmail.sh"/>
+            </tarfileset>
+            <tarfileset prefix="davmail-linux-x86-${version}" dir="dist">
+                <include name="davmail.desktop"/>
+                <include name="lib/*.jar"/>
+                <include name="*.jar"/>
+                <include name="lib/swt-*-gtk-linux-x86.jar"/>
+                <exclude name="lib/swt-*-gtk-linux-x86_64.jar"/>
+                <exclude name="lib/swt-*-carbon-macosx.jar"/>
+                <exclude name="lib/swt-*-win32-x86.jar"/>
+            </tarfileset>
+        </tar>
+        <tar tarfile="dist/davmail-linux-x86_64-${version}.tgz" compression="gzip">
+            <tarfileset prefix="davmail-linux-x86_64-${version}" dir="dist" filemode="755">
+                <include name="davmail.sh"/>
+            </tarfileset>
+            <tarfileset prefix="davmail-linux-x86_64-${version}" dir="dist">
+                <include name="davmail.desktop"/>
+                <include name="lib/*.jar"/>
+                <include name="*.jar"/>
+                <include name="lib/swt-*-gtk-linux-x86_64.jar"/>
+                <exclude name="lib/swt-*-gtk-linux-x86.jar"/>
+                <exclude name="lib/swt-*-carbon-macosx.jar"/>
+                <exclude name="lib/swt-*-win32-x86.jar"/>
+            </tarfileset>
+        </tar>
+        <antcall target="dist-nsis"/>
+        <!-- source package -->
+        <tar tarfile="dist/davmail-src-${version}.tgz" compression="gzip" longfile="gnu">
+            <tarfileset prefix="davmail-src-${version}" dir=".">
+                <include name="**/*"/>
+                <exclude name="build.log"/>
+                <exclude name="dist/**"/>
+                <exclude name="target/**"/>
+                <exclude name="archive/**"/>
+            </tarfileset>
+        </tar>
+    </target>
+
+</project>
