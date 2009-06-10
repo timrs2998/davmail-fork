@@ -1,0 +1,65 @@
+<?xml version="1.0"?>
+<document>
+
+    <properties>
+        <title>DavMail POP/IMAP/SMTP/Caldav Exchange Gateway - Frequently asked questions</title>
+        <author email="mguessan@free.fr">Mickael Guessant</author>
+    </properties>
+
+    <body>
+
+        <section name="Frequently asked questions">
+            <p>Frequently asked questions on DavMail forums, mailing list or direct email.
+            </p>
+            <section name="General">
+                <p>
+                    <strong>Authentication fails with invalid user or password message</strong>
+                </p>
+                <p>Authentication fails with the following message:
+                    <code>Authentication failed: invalid user or password, retry with domain\user</code>
+                </p>
+                <p>Exchange before 2007 expects domain qualified user name, you may not have
+                    to provide the domain name on the logon form if javascript is used to add it,
+                    but DavMail can not execute javascript. Thus you need to prefix your user name
+                    with the Active Directory domain followed by \
+                </p>
+
+                <p>
+                    <strong>Authentication fails with error in parsing the status line</strong>
+                </p>
+                <p>Authentication fails with the following message:
+                    <code>error in parsing the status line from the response: unable to find line starting with "HTTP"
+                    </code>
+                </p>
+                <p>Your Exchange server expects HTTPS (secured) connections, use https instead of http in
+                    OWA url.
+                </p>
+            </section>
+
+            <section name="Caldav (calendar)">
+                <p>
+                    <strong>How do I detect errors in Thunderbird/Lightning calendar ?</strong>
+                </p>
+                <p>Unfortunately, Lightning does not provide much feedback of what is going
+                    on. To detect errors at this level, you may activate calendar log settings
+                    under Tools/Options/Advanced:
+                </p>
+                <source>calendar.debug.log=true
+calendar.debug.log.verbose=true
+                </source>
+
+                <p>
+                    <strong>Invalid notifications</strong>
+                </p>
+                <p>Lightning 0.9 mail notifications are broken, activate
+                    Caldav notifications to outbox instead:
+                </p>
+                <p>Check the following parameter in Thunderbird, it should be set
+                    to true
+                </p>
+                <source>calendar.caldav.sched.enabled=true</source>
+
+            </section>
+        </section>
+    </body>
+</document>
