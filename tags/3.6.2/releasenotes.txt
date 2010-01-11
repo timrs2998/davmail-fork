@@ -1,0 +1,473 @@
+** DavMail 3.6.1 released **
+This is a bugfix release with fixed regressions from 3.6.0
+and a few enhancements from user feedback.
+
+Documentation:
+- Doc: switch download links to generic link
+- Doc: Update roadmap
+- Doc: add roadmap
+
+Bugfixes:
+- Fix regression in Form Based Authentication: detect Exchange 2007 UserContext cookie
+- Host is mandatory for NTLMScheme, get current hostname for proxy authentication
+
+Enhancements:
+- Experimental: reactivate NTLM authentication but leave authentication preemptive mode to allow basic authentication.
+- Move PKCS11 registration to a separate class to avoid ClassNotFoundException
+- Experimental OTP (token) based authentication
+- Vista png icons support for JSmooth
+- Fix from audit
+- New upload-dist ant task to upload new release files
+
+Caldav:
+- Caldav: failover for Exchange 2007 plus encoding issue, search event by displayname to get permanent Url
+- Caldav: Additional timezones
+- Caldav: Revert commit 765, VTODO events have a null instancetype
+- Caldav: additional timezone
+- Caldav: Remove MAILTO: in addition to mailto: in getFreeBusy
+- Caldav: Bug 2898469 do not UrlEncode draft url twice to avoid 404 not found on send event message
+
+** DavMail 3.6.0 released **
+This release contains a lot of enhancements, both bug fixes
+and new features from user feedback on 3.5.0, including improved
+Evolution LDAP support, LDAP abandon support (faster searches with
+Evolution and OSX), experimental windows service wrapper, improved
+form based authentication support and ENVELOPE IMAP command support.  
+I wish to thank Dan Foody for his valuable contributions on
+OSX Snow Leopard support (attendee completion in iCal and complex
+LDAP filters handling).
+Also added an architecture schema on DavMail home page to quickly
+describe DavMail features.
+
+LDAP:
+- LDAP: implement cn=* filter for Evolution
+- LDAP: run searches in separate threads to implement ABANDON, will make searches faster with some clients (Evolution and OSX address book)
+- LDAP: implement startsWith on Contact search, only objectclass=* is a full search
+- LDAP: fix for iCal4 attendee completion,  send localhost if current socket is local, else send fully qualified domain name
+- LDAP: major refactoring from Dan Foody to improve complex filters handling
+- LDAP: improve contact search, reencode uids to hex to avoid case sensitivity issues
+
+Documentation:
+- Doc: Set Dan Foody as main java contributor
+- Doc: improve DavMail logo
+- Doc: add new Logo, improve internet explorer compatibility
+- Doc: Add an architecture schema on site welcome page
+- Doc: Improve getting started documentation, explain Exchange 2003 and 2007 paths (/exchange/ and /owa/) 
+- Doc: fix site style
+- Doc: fix maven site title
+
+SMTP:
+- SMTP: fix by Marc Macenko, case sensitive RCPT TO: 
+- SMTP: allow lower case commands
+- SMTP: experimental: remove Content-Type on create message to avoid 406 not acceptable with some Exchange servers.
+
+Bugfixes:
+- Fix 2887947: Exchange server with a username hidden field
+
+Enhancements:
+- Check for released version in a separate thread and set timeout to ten seconds
+- Refactor message url encoding
+- Upgrade Jmooth wrappers, add -Xrs jvm option to davmailservice wrapper to avoid service stop on user session logout (http://sourceforge.net/projects/jsmooth/forums/forum/297041/topic/2370742)
+- Fix regression from revision 811
+- Refactor ExchangeSession, use StringUtil to simplify code
+- Remove username duplicate check, as formLogin now resets values before POST
+- Start refactoring: StringUtil class
+- Fix classpath in jsmooth wrappers to use new javamail
+- Allow custom form with userid/pw fields in form based authentication
+- Improve form based authentication, look for Exchange session cookies sessionid and cadata
+- Fix test
+- Upgrade JavaMail to 1.4.1
+- New create folder method
+- Fix FBA authentication, reset query string in getAbsoluteURI()
+- New abstract JUnit test case class
+- Detect redirect form instead of logon form, follow redirect to logon form
+- Add an upload-site ant task
+- Fixes from audit
+- Fix settings default values and update doc
+- Drop icon activity switches under 250ms to avoid fast flickering on OSX, add new switch icon in IMAP fetch iterations
+- Improve script based form redirect to handle more cases
+- Refactor ExchangeSession to allow independent session creation.
+- Allow directory in logFilePath settings, add /davmail.log suffix in this case
+- Allow follow redirects on /public GET requests
+
+Caldav:
+- Caldav: use permanenturl for Caldav to avoid encoding issues
+- Caldav: do not close connection on 401 authorization required, may help iCal authentication
+- Caldav: Additional Allday fix for Exchange 2007 and Outlook, implement a failover with a new davmail.timezoneId setting.
+- Caldav: fix regression on create event, missing CRLF in mime message
+- Caldav: Fix regression on public calendar folders linked to multiple calendar support for iCal
+- Caldav: use chunked response to send calendar folder content as ICS to avoid timeout
+- Caldav: Experimental GET ics on folder and fix regression on public folder access
+- Caldav: get current VTIMEZONE body from OWA to create Allday events compatible with Outlook. Users still need to select the same Timezone in Outlook and OWA.
+- Caldav: Fix Timezone value
+- Caldav: Create a new setting davmail.forceActiveSyncUpdate to let users choose to force ActiveSync event. Note: custom iCal or Lightning ICS properties are lost if this option is enabled.
+- Caldav: Some Exchange servers redirect to a different host for freebusy, use wide auth scope
+- Caldav: Another fix from Dan Foody: improve dumpICS debug option
+- Caldav: need to check session on each request, credentials may have changed or session expired
+- Caldav: fix regression after ActiveSync patch, PROPPATCH on contentClass removes all custom ICS properties
+- Caldav: improve getICSValue, do not return values inside VALARM section
+- Caldav: do not send events with a null instancetype (may be the cause of iCal failure)
+- CalDav: Send sub folders for multi-calendar support under iCal
+- Caldav: fix path translation to Exchange for calendars in sub folders under /calendar
+- Caldav: Added supported-calendar-component-set to calendar response
+- Caldav: added a debug trace when requested calendar is not user calendar (maybe shared, but often url mistake in Caldav client)
+- Caldav: fix Bug 2686125, PROPPATCH event after PUT to trigger activeSync PUSH, tested with iPhone 3 using activeSync
+
+IMAP:
+- IMAP: use permanenturl instead of href to avoid url encoding issues
+- IMAP: Revert convert absolute IMAP path to relative path, breaks Caldav
+- IMAP: Convert absolute IMAP path to relative path and detect ISA server cookie starting with cadata (instead of equals cadata)
+- IMAP: use upper case NIL in ENVELOPE
+- IMAP: improve MimeMessage handling, drop after fetch to avoid keeping full message in memory
+- IMAP: fix new ENVELOPE feature, must return encoded values
+- IMAP: implement store by id and ENVELOPE
+- IMAP: update message flag only if changed to avoid unneeded message uid bump, may fix Evolution and Apple Mail constant reload issue
+- IMAP: implement search by id
+- IMAP: send default BODYSTRUCTURE on MIME encoding error
+- IMAP: improve complex content-type handling in BODYSTRUCTURE
+- IMAP: fix deleted flag handling, switch to official Exchange IMAP property http://schemas.microsoft.com/mapi/id/{00062008-0000-0000-C000-000000000046}/0x8570
+- IMAP: detect HttpNotFoundException on folder select
+- IMAP: improve public folder error handling
+- IMAP: fix space at end of folder name
+- IMAP: Fix regression on LIST INBOX
+- IMAP: experimental public folder access
+- IMAP: switch to http://schemas.microsoft.com/exchange/contentstate to handle deleted flag (DAV:isdeleted did not work with some Exchange servers).
+- IMAP: implement undelete message
+
+** DavMail 3.5.0 released **
+This release improves OSX Snow Leopard support, thank to
+contributions from Dan Foody. Contact searches are also
+available now in addition to global address book searches
+over LDAP. IMAP with iPhone should now work correctly with
+most messages, Evolution IMAP read flag is fixed.
+Also added an experimental windows service support
+and a lot of other bug fixes and enhancements. 
+
+Doc:
+- Doc: Fix FAQ whitespaces
+- Doc: improve javadoc and code cleanup
+- Doc: New OSX settings screenshot
+- Doc: update release guide
+- Doc: improve index and build doc
+- Doc: detailed WIRE debug log file creation
+
+Windows:
+- Windows: Include DavMail service in windows package
+- Windows: create windows service exe
+- Windows: create windows service exe
+
+IMAP:
+- IMAP: test session expiration on each command, get a new session on expiration
+- IMAP: improve error logging on network down
+- IMAP: fix bug 2845530 implement FLAGS.SILENT command
+- IMAP: fix absolute (public) path handling
+- IMAP: fix BODYSTRUCTURE, build message on full buffer, do not rely on partial buffer (header, body, ...)
+- IMAP: fix bug 2835529 FETCH with unordered range
+- IMAP: send default BODYSTRUCTURE on mime parsing failure
+- IMAP: Improve IMAP bodystructure error logging
+- IMAP: Send bodystructure with headers for iPhone request (BODYSTRUCTURE BODY.PEEK[HEADER]) 
+- IMAP: send BODY[TEXT] for BODY.PEEK[TEXT] request, may improve iPhone support
+- IMAP: First fix for bug 2840255, do not follow redirects on message FETCH
+
+Caldav:
+- Caldav: fix conflict between X-MICROSOFT-CDO-BUSYSTATUS, X-MICROSOFT-CDO-ALLDAYEVENT and ORGANIZER ics patches
+- Caldav: check credentials on each request
+- Caldav: Disable broken sub calendar folders code
+- Caldav: Do not fail on Inbox access denied, just return an empty folder
+- Caldav: fix multi calendar Exchange path for sub folders
+- Caldav: Experimental, fix sub calendar folders path
+- Caldav: Experimental, send sub calendar folders on propfind with depth 1
+- Caldav: Handle multi line description in calendar message body
+- Caldav: merged contribution from Dan Foody,
+- Caldav: convert sound to display alarms and back
+- Caldav: remove additional organizer attendee line
+- Caldav: remove RSVP=TRUE if PARTSTAT is not NEEDS-ACTION
+- Caldav: add dump ICS logging feature
+- Caldav: add a text/plain body to calendar messages
+- Caldav: create a subject for calendar messages
+- Caldav: fixed some encoding issues in Dan's code
+- Caldav: Additional timezones
+- Caldav: failover to DAV:comment instead of CALDAV:schedule-state on some Exchange servers
+
+LDAP:
+- LDAP: iCal fix to suit both iCal 3 and 4:  move cn to sn, remove cn
+- LDAP: iCal: do not send LDAP_SIZE_LIMIT_EXCEEDED on apple-computer search by cn with sizelimit 1
+- LDAP: copy uid to apple-generateduid for iCal attendee search 
+- LDAP: Make sure we do not send empty description field, replace " \n" with null
+- LDAP: fix thread name
+- LDAP: exclude non contact entries from search, fiw map key and sn copy for iCal
+- LDAP: fix contact search, do not send unrequested attributes
+- LDAP: improve Contact search filter support
+- LDAP: Additional Contact attributes
+- LDAP: refactor contact find, generic attribute mapping
+- LDAP: experimental contact search support
+
+OSX:
+- OSX: Prepare hide from Dock option
+- OSX: crazy workaround from Dan Foody to fix attendee search on OSX Snow Leopard
+- OSX: iCal4 (OSX Snow Leopard fixes)
+
+Bug Fixes:
+- Fix regression in Form Based Logon: fix script based logon URI creation with path and query
+- Another network down fix: DavMailException is not network down
+- Improve Form Based Logon: fix script based logon URI creation
+- Improve Form Based Logon: use full URI instead of path in PostMethod, also force trusted=4
+- Simplify HttpClient creation to avoid password decoding bug in commons httpclient ('+' in password decoded as ' ')
+
+Enhancements:
+- Improve HttpException error logging
+- Fixes from checkStyle audit
+- Adjust checkStyle settings
+- Improve error handling on invalid URL
+- Various fixes from FindBugs audit
+- Fix from audit: synchronize access to HttpConnectionManager
+- Refactor ExchangeSession: do not follow redirects with GET methods
+- Fix from audit
+- Do not pass DavMailAuthenticationException to handle network down
+- Custom form (txtUserName, tstUserPass) support
+- Another network down fix from Dan Foody
+- Merged another patch from Dan Foody on network down detection
+- New settings method: return log file directory
+
+** DavMail 3.4.0 released **
+This release includes iPhone 3 Caldav support, upgrade to SWT 3.5,
+Palm Pre IMAP fixes, improved shared/public calendar support
+and a lot of bug fixes.
+
+Doc:
+- Doc: Code cleanup and improve javadoc
+- Doc: Update doc
+- Doc: Upgrade maven site plugin and improve style
+- Doc: Update maven pom inceptionYear
+
+Bug:
+- Bug: Do not try to set Nimbus Look And Feel on Linux with Gtk
+
+Enhancements:
+- Remove NTLM authentication, breaks Basic authentication (missing domain in username)
+- Set NTLM as last authentication scheme
+- Experimental: reenable NTLM authentication
+- Upgrade SWT to 3.5
+- Use getFolderPath in getSubFolders
+- Make API more consistent: createMessage must get a folder path, not URL
+- Enhancement: Patch 2826966 from Eivind Tagseth, Make davmail.sh work from any location
+
+IMAP:
+- IMAP: Need to reset index for Palm pre
+- IMAP: case insensitive search operators
+- IMAP: Fix bug 2835529, implement SEARCH ALL SINCE for Palm Pre
+
+Caldav:
+- Caldav: improve error handling, 440 means 403 forbidden on Exchange
+- Caldav: Fix shared calendar support for Lightning
+- Caldav: additional patch for Outlook created recurring events
+- Caldav: set X-MICROSOFT-CDO-BUSYSTATUS according to TRANSP field
+- Caldav: implement a timezone translation table for iPhone 3, revert organizer patch (breaks notifications with Lightning)
+- Caldav: another iPhone fix, remove organizer line if user is organizer
+- Caldav: generic timezone patch for iPhone 3
+- Caldav: remove empty ics properties
+- Caldav: Remove calendar-proxy, only used for delegate calendars
+- Caldav: try to improve responses for iCal
+- Caldav: fix bug 2833044 Event not found error on dismissing reminders with events created in Outlook with a plus sign in subject
+- Caldav: Experimental, add calendar-proxy DAV option and version in server header
+- Caldav: Add missing allow OPTIONS header
+- Caldav: improve public (shared) calendar support, accept calendars at any depth
+- Caldav: set caldav logging to davmail logging level
+- Caldav: updated fix, remove organizer line if event has no attendees for iPhone
+- Caldav: remove organizer line if current user is organizer for iPhone, will not remove line for events with attendees
+- Caldav: Improve principal -> actualPrincipal detection: use session alias instead of login
+- Caldav: fix bug 2819028, case insensitive email in sendPrincipal test
+- Caldav: iPhone compatibility, remove <C:comp name="VTODO"/>
+- Caldav: iPhone workaround: send calendar subfolder
+- Caldav: revert @ encoding, breaks iCal
+- Caldav: iPhone fix, encode @ in Caldav response hrefs
+- Caldav: untested, extended PROPFIND / response for iPhone 3.0
+- Caldav: fix infinite loop with Sunbird 1.0pre with invalid credentials
+
+SMTP:
+- SMTP: fix bug 2791607, do not patch message body (breaks electronic signature), no longer needed with latest Thunderbird
+
+** DavMail 3.3.0 released **
+This is a bug fix release after two beta releases,
+including PKCS11 (smartcard) client certificate support,
+gateway encryption (SSL) support, the new jackrabbit and httpclient libraries
+and I18N support (french and english available).
+
+- Caldav: updated caldav response headers according to gmail, added Expires and Cache-control HTTP headers
+- POP3: implement NOOP command
+- Doc: Update documentation header
+- Doc: Add GPLv2 header to all source files
+- Doc: Remove Apache license from checkstyle config file header
+- IMAP: fix DELETED/UNDELETED SEARCH parameters
+- IMAP: Fix bug 2822625: support index range in IMAP SEARCH
+- Enhancements: Merged network down (with firewall) code from Dan Foody
+- Caldav: Additional properties and ignore cases for Sunbird
+- Caldav: Fix empty organizer field in ICS (active sync support) and another getParticipants bug
+- GUI: Fix OSX menu default ActionListener
+- GUI: Try to set Nimbus Look And Feel on Linux with Gtk
+
+** DavMail 3.3.0b2 released with smartcard (PKCS11) support **
+This is a bug fix release, with nonetheless one main new feature:
+PKCS11 (smartcard) client certificate support !
+Tested with ActivIdentity ActivClient and Mozilla soft token, should
+work with any PKCS11 module.
+
+Security:
+- (RFE 2800206) PKCS11 (smartcard) client certificate support
+
+Server (daemon) mode:
+- Fix server mode: now all listener threads are daemon, avoid main thread exit and add a shutdown hook
+- Name shutdown thread
+
+Caldav:
+- Move wire debug log with headers
+- Fix NoSuchMethodError with Java 5
+- revert supported-calendar-component-set on root and improve logging
+- fix regression on iCal calendar color change
+- only include attendees with RSVP=TRUE or PARTSTAT=NEEDS-ACTION for notifications (avoid iCal additional notifications)
+- Improve error handling on FreeBusy failure
+- add supported-calendar-component-set property requested by iPhone 3.0
+ Sunbird compatibility, exclude events with empty names
+- Fix for iCal: send etag on GET and HEAD requests
+- Send empty response instead of error on freebusy with unknown attendee
+
+IMAP:
+- revert refreshFolder calls that break Outlook
+
+OSX:
+- Remove default trayIcon listener on OSX
+- Fixed logFilePath logic on OSX
+
+Enhancements:
+- Update ExchangeSession test
+- Exclude optional log4j maven dependencies
+- Added a logFilePath setting to set log4j file appender path, this appender is now added dynamically to avoid davmail.log file create failure
+- Upgrade Log4J to 1.2.15
+- Make sure we do exit: catch exceptions before System.exit
+
+Doc: 
+- Document build process in FAQ
+
+Known issues :
+- Does not - yet - work with iPhone 3.0 Caldav
+- Still issues with Exchange activeSync mode
+
+** Davmail 3.3.0b1 released **
+This release is mainly a deep refactoring: replaced deprecated 
+jakarta slide library with jackrabbit and upgrade httpclient.
+Also added client to gateway encryption (SSL) support, started I18N
+(french and english available) and many bug fixes and enhancements.
+
+I18N:
+- I18N: FrameGatewayTray
+- I18N: Format port numbers and add missing message
+- I18N: improve startup log message
+- I18N: remove Locale.ROOT not available under Java 1.5
+- I18N: externalize and translate exception messages
+- I18N: Do not apply i18n on log file
+- I18N: french localization
+- I18N: externalize all DavGatewayTray log statements for i18n
+- I18N: ldap package
+- I18N: davmail package
+- I18N: start internationalization conversion
+
+POP:
+- POP: Defer message list after login phase and load only uid and size attributes
+- POP: make sure the url is encoded correctly on delete
+
+IMAP:
+- IMAP: Detect fetch of a missing (probably deleted) message to avoid infinite loop with Thunderbird
+- IMAP: reset icon after each command
+
+SMTP:
+- SMTP: fixed two bugs, header ignored because of Exchange 2007 from patch and bccbuffer 
+ double xml encoding (=> Delivery status notification)
+
+LDAP:
+- LDAP: improve ldap search logging
+
+Doc:
+- Add Mitchell V. Oliver as Java Contributor
+- SSL certificate settings documentation in getting started
+- Update OSX doc: credentials are mandatory in Directory Utility settings
+- Add Eivind Tagseth as Java Contributor
+
+Enhancements:
+- Check java version in ant build.xml
+- Fix ExchangeSession test
+- Refactor DavProperty handling with new jackrabbit library
+- Close idle connections to exchange after one minute
+- Avoid 401 roundtrips
+- Remove deprecated HttpException api
+- Replace deprecated setRequestBody with setRequestEntity
+- Refactor DavProperty handling with new jackrabbit library
+- Update packaging and Maven POM after library update
+- Major refactoring: replace deprecated jakarta slide with jackrabbit and upgrade httpclient
+- Upgrade svnkit library
+- Sort properties and display version in startup message
+- Use interactive console certificate accept in headless and/or server mode
+- Append svn build number to release name
+- Additional login failover : get email from options page
+- Replace greyscale inactive icon with a color icon
+- Avoid nullpointerexception in Settings.setProperty
+- Reinsert System.exit after clean shutdown to make sure we do exit
+- Make all threads daemon and remove System.exit calls
+- Patch 2790299 by Mitchell V. Oliver: Add support for SSL to client connections
+- Remember previous checkConfig status to detect network down
+- Fixes from audit
+- Refactor email retrieval : do not throw IOException in failovers
+- Implement BundleMessage.toString() for direct usage in Log4J logger
+- Revert to simple class names in thread names
+- Catch unknown host on session login
+- Workaround for post logon script redirect
+- Workaround for Exchange server misconfiguration: move galfind requests to mailPath or /exchange instead of /public
+- Enhancements from audit
+- Fix exchangeSession test class
+- Improve BindException error message
+- Cleanup from audit
+- Improve exception handling
+- Implement a last resort failover to build email from alias and domain name
+- Limit redirects to 10 instead of 100
+- Replace hardcoded strings
+- Refactor SimpleDateFormat usage
+- Reorganize packages
+
+OSX:
+- OSX: replace JavaApplicationStub link with actual file
+- OSX: Move davmail.log to Library/Logs/DavMail on OSX
+- OSX: Improve Mac OSX Java6 support
+- OSX: fix regression on OSX Quit handler
+
+Bugs fixed:
+- Fix bug 2797272: Add disable update check
+- Do not localize port numbers
+- Replaced localhost check with the isLoopbackAddress() method, should be IPV6 compatible
+- Fix regression : /exchange/ does not work for galfind under Exchange 2007
+- Fixed 2717547: Unsupported filter attribute: apple-group-memberguid
+- URI encode alias in getEmail()
+- Fix SSLProtocolSocketFactory with HttpClient 3.1
+- Reenable limited timeout on getReleasedVersion
+- Always exclude NTLM authentication, not only for proxy authorization
+- Fix 2717446 from Eivind Tagseth
+
+Caldav:
+- Caldav: fix unknown recipient message
+- Caldav: do not send freebusy info if attendee is unknown
+- Caldav: Improve calendar-color patch answer
+- Caldav: implement HEAD request
+- Improve network down detection for Caldav
+- Caldav: No need to check connectivity on HTTPS
+- Caldav: Fix Bug 2783595, allow empty lines in ICS content
+- Caldav: Exclude RSVP=FALSE from notifications recipients list for Outlook 2003 compatibility
+- Caldav: exclude invalid attendees address from recipient list
+- Caldav: avoid duplicate / in event path
+- Caldav: implement public shared calendar
+- Caldav: In progress multi calendar support
+- Caldav: fix regression in FreeBusy date handling
+- Caldav: switch icon during event report
+- Caldav: refactor CaldavConnection, prepare /public context
+- Caldav: another special characters handling improvement
+- Caldav: iCal decodes hrefs, not lightning => detect client in CaldavRequest
+- Caldav: replace etag by resourcetag in getCalendarEtag
+- Caldav: Send events back to the client after each get on REPORT request (avoid iCal timeout)
+- Caldav: no inbox/outbox for delegated calendars
