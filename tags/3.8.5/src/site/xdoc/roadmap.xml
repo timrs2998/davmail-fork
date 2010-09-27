@@ -1,0 +1,57 @@
+<?xml version="1.0"?>
+<document xmlns="http://maven.apache.org/XDOC/2.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/XDOC/2.0 http://maven.apache.org/xsd/xdoc-2.0.xsd">
+
+    <properties>
+        <title>DavMail POP/IMAP/SMTP/Caldav/Carddav/LDAP Exchange Gateway - RoadMap</title>
+        <author email="mguessan@free.fr">Mickael Guessant</author>
+    </properties>
+
+    <body>
+
+        <section name="DavMail RoadMap">
+            <p>DavMail features are now almost complete, yet there remains a lot of place
+                for improvement. The following section lists the expected new features
+                and enhancements in next DavMail versions.
+            </p>
+            <subsection name="3.8.3">
+                <p>
+                    <strong>Next bugfix release</strong>
+                </p>
+                <ul>
+                    <li>Per service SSL setting</li>
+                </ul>
+            </subsection>
+            <subsection name="3.9.0">
+                <p>
+                    <strong>Next minor release</strong>
+                </p>
+                <ul>
+                    <li>Create a new RPM package with redline rpm ant task</li>
+                    <li>Implement Caldav attachments</li>
+                    <li>Implement hide from Dock option on OSX</li>
+                    <li>Implement multiple mailbox access over IMAP with domain/user/mailbox:
+                        http://msexchangeteam.com/archive/2004/03/31/105275.aspx
+                    </li>
+                </ul>
+            </subsection>
+            <subsection name="4.0">
+                <p>
+                    <strong>Next major version</strong>
+                </p>
+                <ul>
+                    <li>Implement optional ICS Todo/Task conversion to Outlook tasks</li>
+                    <li>Exchange 2010 support through EWS: Experimental implementation already available but not
+                        complete, set davmail.enableEws=true in davmail.properties to test
+                    </li>
+                    <li>Jsmooth Windows 64 bit wrappers</li>
+                    <li>Include Unix init.d script to help users use DavMail in server mode</li>
+                    <li>Implement custom authenticator interface to handle specific authentications
+                        (e.g. token based)
+                    </li>
+                </ul>
+            </subsection>
+        </section>
+    </body>
+</document>
