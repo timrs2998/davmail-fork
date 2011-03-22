@@ -1,0 +1,73 @@
+<?xml version="1.0"?>
+<document xmlns="http://maven.apache.org/XDOC/2.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/XDOC/2.0 http://maven.apache.org/xsd/xdoc-2.0.xsd">
+
+    <properties>
+        <title>DavMail POP/IMAP/SMTP/Caldav/Carddav/LDAP Exchange Gateway - Getting started</title>
+        <author email="mguessan@free.fr">Mickael Guessant</author>
+    </properties>
+
+    <body>
+
+        <section name="DavMail configuration">
+            <p>In order to change DavMail settings, double click on the tray icon or
+                right click on it and choose
+                <code>Settings...</code>
+            </p>
+            <div style="width: 100%;text-align: center">
+                <img src="images/davmailSettings.png" alt=""/>
+            </div>
+            <p>The following table describes the main options :</p>
+            <table>
+                <tr>
+                    <th>Parameter</th>
+                    <th>Description</th>
+                    <th>Sample value</th>
+                </tr>
+                <tr>
+                    <td>OWA url</td>
+                    <td>Outlook Web Access URL to access the exchange server, i.e. the base webmail URL
+                        <br/>
+                        Note: use /owa/ path for Exchange 2007 or 2010, /exchange/ for older versions
+                    </td>
+                    <td>https://exchangeServer/owa/</td>
+                </tr>
+                <tr>
+                    <td>Local POP port</td>
+                    <td>Local POP server port to configure in POP client</td>
+                    <td>110</td>
+                </tr>
+                <tr>
+                    <td>Local IMAP port</td>
+                    <td>Local IMAP server port to configure in IMAP client</td>
+                    <td>143</td>
+                </tr>
+                <tr>
+                    <td>Local SMTP port</td>
+                    <td>Local SMTP server port to configure in POP client</td>
+                    <td>25</td>
+                </tr>
+                <tr>
+                    <td>Local Caldav HTTP port</td>
+                    <td>Local Caldav server port to configure in Caldav (calendar) client</td>
+                    <td>80</td>
+                </tr>
+                <tr>
+                    <td>Local LDAP port</td>
+                    <td>Local LDAP server port to configure in directory (address book) client</td>
+                    <td>389</td>
+                </tr>
+            </table>
+            <p>Uncheck a port to disable matching service.</p>
+            <p>Activate panel under Proxy tab to set an HTTP proxy and associated credentials if needed</p>
+            <p>If you need to adjust other advanced settings, check <a href="advanced.html">Advanced settings</a></p>
+            <p>Proceed to
+                <a href="thunderbirdmailsetup.html">Thunderbird mail setup</a>
+                or
+                <a href="osxicalsetup.html">OSX iCal setup</a>
+            </p>
+        </section>
+
+    </body>
+</document>
