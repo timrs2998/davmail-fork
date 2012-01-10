@@ -1,0 +1,84 @@
+<?xml version="1.0"?>
+<document xmlns="http://maven.apache.org/XDOC/2.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/XDOC/2.0 http://maven.apache.org/xsd/xdoc-2.0.xsd">
+
+    <properties>
+        <title>DavMail POP/IMAP/SMTP/Caldav/Carddav/LDAP Exchange Gateway - Getting started</title>
+        <author email="mguessan@free.fr">Mickael Guessant</author>
+    </properties>
+
+    <body>
+
+        <section name="DavMail configuration">
+            <p>In order to change DavMail settings, double click on the tray icon or
+                right click on it and choose
+                <code>Settings...</code>
+            </p>
+            <div style="width: 100%;text-align: center">
+                <img src="images/davmailSettings.png" alt=""/>
+            </div>
+            <p>The following table describes the main options :</p>
+            <table>
+                <tr>
+                    <th>Parameter</th>
+                    <th>Description</th>
+                    <th>Sample value</th>
+                </tr>
+                <tr>
+                    <td>OWA url</td>
+                    <td>Outlook Web Access URL to access the exchange server, i.e. the base webmail URL
+                        <br/>
+                        The path depends on Exchange version and configuration, with or without a reverse proxy.
+                        DavMail must be able to find the authentication form at the provided URL.<br/>
+                        Usual paths for different Exchange versions:<br/>
+                        <ul>
+                          <li>Exchange 2003: <code>https://<i>mail.company.com</i>/exchange/</code></li>
+                          <li>Exchange 2007 Webdav mode: <code>https://<i>mail.company.com</i>/owa/</code></li>
+                          <li>Exchange 2007 EWS mode: <code>https://<i>mail.company.com</i>/owa/</code></li>
+                          <li>Exchange 2010 EWS mode: <code>https://<i>mail.company.com</i>/owa/</code></li>
+                          <li>Exchange 2010 EWS mode with unsupported authentication form e.g. Windows Live login:
+                              <code>https://<i>mail.company.com</i>/ews/exchange.asmx</code></li>
+                        </ul>
+                    </td>
+                    <td>https://exchangeServer/owa/</td>
+                </tr>
+                <tr>
+                    <td>Local POP port</td>
+                    <td>Local POP server port to configure in POP client</td>
+                    <td>110</td>
+                </tr>
+                <tr>
+                    <td>Local IMAP port</td>
+                    <td>Local IMAP server port to configure in IMAP client</td>
+                    <td>143</td>
+                </tr>
+                <tr>
+                    <td>Local SMTP port</td>
+                    <td>Local SMTP server port to configure in SMTP client</td>
+                    <td>25</td>
+                </tr>
+                <tr>
+                    <td>Local Caldav/Carddav HTTP port</td>
+                    <td>Local Caldav/Carddav server port to configure in Caldav (calendar)
+                        or Carddav (address book) client</td>
+                    <td>80</td>
+                </tr>
+                <tr>
+                    <td>Local LDAP port</td>
+                    <td>Local LDAP server port to configure in directory (address book) client</td>
+                    <td>389</td>
+                </tr>
+            </table>
+            <p>Uncheck a port to disable matching service.</p>
+            <p>Activate panel under Proxy tab to set an HTTP proxy and associated credentials if needed</p>
+            <p>If you need to adjust other advanced settings, check <a href="advanced.html">Advanced settings</a></p>
+            <p>Proceed to
+                <a href="thunderbirdmailsetup.html">Thunderbird mail setup</a>
+                or
+                <a href="osxicalsetup.html">OSX iCal setup</a>
+            </p>
+        </section>
+
+    </body>
+</document>
