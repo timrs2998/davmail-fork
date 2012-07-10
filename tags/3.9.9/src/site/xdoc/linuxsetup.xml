@@ -1,0 +1,65 @@
+<?xml version="1.0"?>
+<document xmlns="http://maven.apache.org/XDOC/2.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/XDOC/2.0 http://maven.apache.org/xsd/xdoc-2.0.xsd">
+
+    <properties>
+        <title>DavMail POP/IMAP/SMTP/Caldav/Carddav/LDAP Exchange Gateway - Linux setup</title>
+        <author email="mguessan@free.fr">Mickael Guessant</author>
+    </properties>
+
+    <body>
+
+        <section name="DavMail Setup on linux">
+            <subsection name="Debian package">
+                <p>Download current debian package from Sourceforge, double click on it
+                    to launch package installer.
+                </p>
+                <p>
+                    Select Install Package, installer will automatically download and
+                    install Java and the appropriate SWT package. After installation,
+                    DavMail is available in the Applications menu.
+                </p>
+                <p>Note to Ubuntu 12 Natty users: they eventually fixed Oneiric issue, use gsettings command below</p>
+                <p>Note to Ubuntu 11.10 Oneiric users: Unity does not support system tray defined by FreeDesktop, you will need
+                to switch to standard Gnome Panel to use DavMail (and any other application using system tray)</p>
+                <p>Note to Ubuntu 10.04 users: all tray icons are hidden by default, use the following command to restore normal mode:</p>
+                <code>gsettings set com.canonical.Unity.Panel systray-whitelist "['all']"</code>
+            </subsection>
+            <subsection name="Manual setup">
+                <p>Prerequisite: OpenJDK 6 or 7 or Sun JRE 6. Tray icon is now implemented with SWT and compatible with
+                    Java 5.
+                </p>
+                <p>Note: some users reported issues with OpenJDK 6, please upgrade to OpenJDK 7 in this case.</p>
+
+                <p>You should first download and install Java, with the graphical package manager or through
+                    command line.
+                </p>
+                <p>Under Ubuntu, launch System/Administration/Synaptic Package Manager, quick search
+                    default-jre, mark for installation and click Apply
+                </p>
+                <p>Or use the following command:</p>
+                <code>sudo apt-get install default-jre</code>
+
+                <p>Download the linux x86 DavMail package from Sourceforge and uncompress it with
+                    your favorite tool. The standard package will run natively on x86, to use DavMail
+                    on any other hardware platform, replace the SWT with the right one from
+                    <a href="http://www.eclipse.org/swt/">http://www.eclipse.org/swt/</a>
+                    or use the platform independent package.
+                </p>
+                <p>On Ubuntu and other Gnome or Kde distributions, just use the desktop launcher.
+                    On other distributions, try
+                    <code>davmail.sh</code>.
+                    You should now see the DavMail gateway icon in the tray :
+                </p>
+                <div style="width: 100%;text-align: center">
+                    <img align="middle" src="images/ubuntutray.png" alt=""/>
+                </div>
+                <p>Adjust DavMail settings :
+                    <a href="gettingstarted.html">Getting started</a>
+                </p>
+            </subsection>
+        </section>
+
+    </body>
+</document>
