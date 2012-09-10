@@ -1,0 +1,74 @@
+<?xml version="1.0"?>
+<document xmlns="http://maven.apache.org/XDOC/2.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/XDOC/2.0 http://maven.apache.org/xsd/xdoc-2.0.xsd">
+
+    <properties>
+        <title>DavMail POP/IMAP/SMTP/Caldav/Carddav/LDAP Exchange Gateway</title>
+        <author email="mguessan@free.fr">Mickael Guessant</author>
+    </properties>
+
+    <body>
+        <section name="DavMail POP/IMAP/SMTP/Caldav/Carddav/LDAP Exchange Gateway">
+            <table class="about" border="0" style="width: 98%">
+                <tr>
+                    <td>
+                        <p>Ever wanted to get rid of Outlook ? DavMail is a POP/IMAP/SMTP/Caldav/Carddav/LDAP exchange
+                            gateway allowing users to use any mail/calendar client (e.g. Thunderbird with Lightning or
+                            Apple iCal) with an Exchange server, even from the internet or behind a firewall through
+                            Outlook Web Access.
+                            DavMail now includes an LDAP gateway to Exchange global address book and user personal
+                            contacts to allow recipient address completion in mail compose window and full calendar
+                            support with attendees free/busy display.
+                        </p>
+                        <p>DavMail also supports the CardDav protocol to sync address books. This new feature
+                            is sponsored by
+                            <a href="http://www.defense.gouv.fr/dga/">French Defense / DGA</a>
+                            through project
+                            <a href="http://www.trustedbird.org">Trustedbird</a>
+                        </p>
+                        <div style="width: 100%;text-align: center">
+                            <img src="images/davmailArchitecture.png" alt="DavMail Architecture" width="550"
+                                 height="364"/>
+                        </div>
+                        <p>The main goal of DavMail is to provide standard compliant protocols in front of proprietary
+                            Exchange. This means LDAP for global address book, SMTP to send messages, IMAP to browse
+                            messages on the server in any folder, POP to retrieve inbox messages only, Caldav for
+                            calendar support and Carddav for personal contacts sync.
+                            Thus any standard compliant client can be used with Microsoft Exchange.
+                        </p>
+                        <p>DavMail gateway is implemented in java and should run on any platform. Releases are tested
+                            on Windows, Linux (Ubuntu) and Mac OSX. Tested successfully with the Iphone
+                            (gateway running on a server).
+                        </p>
+                    </td>
+                    <td>
+                        <div style="text-align: center">
+                            <script type="text/javascript"
+                                    src="http://www.ohloh.net/p/106265/widgets/project_thin_badge.js">
+                            </script>
+                        </div>
+                        <a class="donate" href="https://sourceforge.net/donate/index.php?group_id=184600"
+                           title="Donate">
+                            Donate
+                        </a>
+                        <a class="download" href="download.html">
+                            Download DavMail Gateway
+                        </a>
+                        <div style='padding: 20px;'>
+                        <a href="http://www.jetbrains.com/idea/"
+                           style="position: relative;display:block; width:88px; height:31px; border:0; margin:0;padding:0;text-decoration:none;text-indent:0;">
+                            <span style="margin: 0;padding: 0;position: absolute;top: -1px;left: 4px;font-size: 10px;cursor:pointer;  background-image:none;border:0;color: #0d3a9e; font-family: trebuchet ms,arial,sans-serif;font-weight: normal;text-align:left;">
+                                Developed with
+                            </span>
+                            <img src="http://www.jetbrains.com/idea/opensource/img/all/banners/idea88x31_white.gif"
+                                 alt="The best Java IDE" border="0"/>
+                        </a>
+                        </div>
+                    </td>
+                </tr>
+            </table>
+        </section>
+    </body>
+</document>
+        

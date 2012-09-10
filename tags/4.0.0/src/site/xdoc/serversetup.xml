@@ -1,0 +1,125 @@
+<?xml version="1.0"?>
+<document xmlns="http://maven.apache.org/XDOC/2.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/XDOC/2.0 http://maven.apache.org/xsd/xdoc-2.0.xsd">
+
+    <properties>
+        <title>DavMail POP/IMAP/SMTP/Caldav/Carddav/LDAP Exchange Gateway - Server setup</title>
+        <author email="mguessan@free.fr">Mickael Guessant</author>
+    </properties>
+
+    <body>
+
+        <section name="DavMail Setup as a standalone server">
+            <p>Prerequisite : Sun JRE 5, 6 or 7 or OpenJDK 6 or 7.
+            </p>
+
+            <p>Davmail Gateway can run in server mode as a gateway between the mail
+                client and the Outlook Web Access (Exchange) server.
+                In server mode Davmail can run on any Java supported platform.
+                This mode was tested successfully with the Iphone and should work with
+                any phone with POP/IMAP/SMTP/LDAP/Caldav/Carddav client.
+                In this mode many users can share the same DavMail instance.
+            </p>
+
+            <p>Download the generic DavMail package from Sourceforge and uncompress it with
+                your favorite tool, e.g. on Linux:&#x20;<code>unzip davmail-*.zip</code>.
+            </p>
+            <p>Prepare a davmail.properties file according to your local needs :
+            </p>
+            <source><![CDATA[
+davmail.url=http://exchangeServer/exchange/
+davmail.enableEws=false
+davmail.popPort=1110
+davmail.imapPort=1143
+davmail.smtpPort=1025
+davmail.caldavPort=1080
+davmail.ldapPort=1389
+davmail.keepDelay=30
+davmail.sentKeepDelay=90
+davmail.caldavPastDelay=90
+davmail.imapIdleDelay=
+davmail.useSystemProxies=false
+davmail.enableProxy=false
+davmail.proxyHost=
+davmail.proxyPort=
+davmail.proxyUser=
+davmail.proxyPassword=
+davmail.noProxyFor=
+davmail.ssl.keystoreType=JKS
+davmail.ssl.keyPass=
+davmail.ssl.keystoreFile=
+davmail.ssl.keystorePass=
+davmail.smtpSaveInSent=true
+davmail.server=true
+davmail.server.certificate.hash=
+davmail.bindAddress=
+davmail.clientSoTimeout=
+davmail.allowRemote=true
+davmail.disableUpdateCheck=false
+log4j.rootLogger=WARN
+log4j.logger.davmail=DEBUG
+log4j.logger.org.apache.commons.httpclient=WARN
+log4j.logger.httpclient.wire=WARN
+davmail.logFilePath=/var/log/davmail.log]]>
+            </source>
+            <p>See
+                <a href="gettingstarted.html">Getting started</a>
+                for more information on
+                the options. Make sure davmail.server is set to true (no icon tray) and allow
+                remote connections: davmail.allowRemote=true.
+            </p>
+            <p>To disable a service, set an empty port value.</p>
+            <p>Launch Davmail with the following command:
+                <source>nohup davmail.sh davmail.properties &amp;</source>.
+            </p>
+            <p>Then check messages:
+                <source>tail -f nohup.out</source>
+            </p>
+        </section>
+
+        <section name="Register DavMail windows service">
+            <p>A new WinRun4J davmailservice.exe wrapper is available in the windows
+                package.
+            </p>
+            <p>To register DavMail as a windows service, use:
+                <source>davmailservice --WinRun4J:RegisterService</source>
+                or
+                <source>sc create DavMail binPath= \path\to\davmailservice.exe type= own start= auto</source>
+            </p>
+        </section>
+
+        <section name="DavMail Setup as a JEE Web Application">
+            <p>Prerequisites : Sun JRE 5, 6 or 7 or OpenJDK 6 or 7 and any JEE compliant web container
+            </p>
+
+            <p>Davmail Gateway can now be deployed in any JEE application server using
+                the war package. In this mode, DavMail listener threads run inside the
+                application server and follow the web application lifecycle (start,
+                stop, deploy, undeploy). The following items describe Tomcat deployment,
+                details will vary according to the specific application server available.
+            </p>
+
+            <p>Download the war DavMail package from Sourceforge<code>davmail-*.war</code>,
+                and deploy it inside the application server. In Tomcat, this means copy the
+                war file to the webapps directory. If Tomcat is started and automatic
+                deployment enabled (this is the default configuration), the package is
+                automatically uncompressed and started.
+            </p>
+            <p>The davmail.properties configuration file is then available under
+                <code>davmail-*/WEB-INF/classes</code>.
+            </p>
+
+            <p>Note: DavMail does not use the standard Tomcat HTTP connector and uses the same listeners
+                in war and server modes. This means the HTTP port for Caldav url is specified in davmail.properties
+            </p>
+
+            <p>See above and
+                <a href="gettingstarted.html">Getting started</a>
+                for more information on
+                the options. Make sure davmail.server is set to true (no icon tray) and allow
+                remote connections: davmail.allowRemote=true.
+            </p>
+        </section>
+    </body>
+</document>
