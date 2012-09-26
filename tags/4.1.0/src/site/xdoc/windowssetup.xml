@@ -1,0 +1,56 @@
+<?xml version="1.0"?>
+<document xmlns="http://maven.apache.org/XDOC/2.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/XDOC/2.0 http://maven.apache.org/xsd/xdoc-2.0.xsd">
+
+    <properties>
+        <title>DavMail POP/IMAP/SMTP/Caldav/Carddav/LDAP Exchange Gateway - Windows setup</title>
+        <author email="mguessan@free.fr">Mickael Guessant</author>
+    </properties>
+
+    <body>
+
+        <section name="DavMail Setup on windows">
+            <p>Prerequisite : Sun JRE 5, 6 or 7. Tray icon is now implemented with SWT and compatible with
+                Java 5. You may use DavMail with an older version, but the gateway will run as a
+                command line application.
+            </p>
+
+            <p>If Java is not available, DavMail Jsmooth launcher will trigger java download and
+                setup.
+            </p>
+
+            <p>DavMail setup is straightforward, just follow the setup wizard.
+            </p>
+            <p>Choose language:
+            </p>
+            <div style="width: 100%;text-align: center">
+                <img src="images/setup1.png" alt=""/>
+            </div>
+            <p>Click Next:
+            </p>
+            <div style="width: 100%;text-align: center">
+                <img src="images/setup2.png" alt=""/>
+            </div>
+            <p>Accept GPL licence:
+            </p>
+            <div style="width: 100%;text-align: center">
+                <img src="images/setup3.png" alt=""/>
+            </div>
+            <p>Choose path:
+            </p>
+            <div style="width: 100%;text-align: center">
+                <img src="images/setup4.png" alt=""/>
+            </div>
+            <p>Launch installation and start gateway:
+            </p>
+            <div style="width: 100%;text-align: center">
+                <img src="images/setup5.png" alt=""/>
+            </div>
+            <p>Adjust DavMail settings :
+                <a href="gettingstarted.html">Getting started</a>
+            </p>
+        </section>
+
+    </body>
+</document>

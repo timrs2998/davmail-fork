@@ -1,0 +1,437 @@
+<project name="DavMail" default="dist" basedir=".">
+    <property file="user.properties"/>
+    <property name="version" value="4.1.0"/>
+
+    <path id="classpath">
+        <pathelement location="classes"/>
+        <fileset dir="lib">
+            <include name="*.jar"/>
+        </fileset>
+    </path>
+
+    <target name="clean">
+        <delete dir="target"/>
+        <delete dir="dist"/>
+        <delete file="build.log"/>
+    </target>
+
+    <condition property="is.windows">
+        <os family="windows"/>
+    </condition>
+    <condition property="is.svn">
+        <available file=".svn"/>
+    </condition>
+
+    <condition property="is.java6">
+        <or>
+            <equals arg1="${ant.java.version}" arg2="1.6"/>
+            <equals arg1="${ant.java.version}" arg2="1.7"/>
+        </or>
+    </condition>
+
+    <target name="check-java6" unless="is.java6">
+        <fail message="Java 6 needed to build DavMail, current version is ${ant.java.version}, check JAVA_HOME"/>
+    </target>
+
+    <target name="svnrelease" if="is.svn">
+        <typedef resource="org/tigris/subversion/svnant/svnantlib.xml">
+            <classpath>
+                <fileset dir="svnant">
+                    <include name="*.jar"/>
+                </fileset>
+            </classpath>
+        </typedef>
+        <svn svnkit="true">
+            <wcversion path="."/>
+        </svn>
+        <!-- failover value for revision -->
+        <property name="revision.max" value=""/>
+        <property name="release" value="${version}-${revision.max}"/>
+    </target>
+
+    <target name="defaultrelease" unless="is.svn">
+        <property name="release" value="${version}"/>
+    </target>
+
+    <target name="init" depends="check-java6, svnrelease, defaultrelease">
+        <echo message="Creating DavMail ${release} dist package"/>
+        <mkdir dir="target/classes"/>
+    </target>
+
+    <target name="compile" depends="init">
+        <mkdir dir="target/classes"/>
+        <javac srcdir="src/java" destdir="target/classes" source="1.5" target="1.5" debug="on" encoding="UTF-8"
+               includeantruntime="false">
+            <classpath>
+                <path refid="classpath"/>
+            </classpath>
+        </javac>
+        <copy todir="target/classes">
+            <fileset dir="src/java">
+                <include name="**/*"/>
+                <exclude name="**/*.java"/>
+            </fileset>
+        </copy>
+    </target>
+
+    <target name="dist-nsis" if="is.windows">
+        <taskdef name="nsis" classname="net.sf.nsisant.Task">
+            <classpath location="lib/nsisant-1.2.jar"/>
+        </taskdef>
+        <nsis script="davmail-setup.nsi" verbosity="4" out="build.log" noconfig="yes">
+            <define name="VERSION" value="${release}"/>
+        </nsis>
+    </target>
+
+    <target name="dist-osx">
+        <taskdef name="jarbundler"
+                 classname="net.sourceforge.jarbundler.JarBundler">
+            <classpath location="lib/jarbundler-2.1.0.jar"/>
+        </taskdef>
+        <jarbundler dir="dist"
+                    shortname="DavMail"
+                    name="DavMail"
+                    mainclass="davmail.DavGateway"
+                    build="${release}"
+                    icon="src/osx/tray.icns"
+                    infostring="DavMail Gateway ${release}"
+                    jvmversion="1.5+"
+                    version="${release}"
+                    vmoptions="-Dsun.net.inetaddr.ttl=60 -Xmx512m"
+                    workingdirectory="$APP_PACKAGE"
+                    stubfile="src/osx/davmail">
+            <jarfileset dir="dist">
+                <include name="*.jar"/>
+            </jarfileset>
+            <jarfileset dir="dist/lib">
+                <include name="*.jar"/>
+                <include name="*.jnilib"/>
+                <exclude name="swt*.jar"/>
+                <exclude name="junit-*.jar"/>
+                <exclude name="winrun4j-*.jar"/>
+            </jarfileset>
+        </jarbundler>
+        <!-- prepare hide from dock option -->
+        <replaceregexp file="dist/DavMail.app/Contents/Info.plist" match="&lt;key>CFBundleName&lt;/key>"
+                       replace="&lt;key>LSUIElement&lt;/key>&lt;string>0&lt;/string>&lt;key>CFBundleName&lt;/key>"/>
+        <!-- Retina display support -->
+        <replaceregexp file="dist/DavMail.app/Contents/Info.plist" match="&lt;key>CFBundleName&lt;/key>"
+                       replace="&lt;key>NSHighResolutionCapable&lt;/key>&lt;true/>&lt;key>CFBundleName&lt;/key>"/>
+        <zip file="dist/DavMail-MacOSX-${release}.app.zip">
+            <zipfileset dir="dist">
+                <include name="DavMail.app/**/*"/>
+                <exclude name="DavMail.app/Contents/MacOS/davmail"/>
+            </zipfileset>
+            <zipfileset dir="dist" filemode="755">
+                <include name="DavMail.app/Contents/MacOS/davmail"/>
+            </zipfileset>
+        </zip>
+        <!--delete dir="dist/DavMail.app"/-->
+    </target>
+
+    <target name="dist-deb">
+        <taskdef resource="ant_deb_task.properties">
+            <classpath location="lib/ant-deb-0.0.1.jar"/>
+        </taskdef>
+        <desktopentry
+                toFile="dist/davmail.desktop"
+                name="DavMail"
+                comment="DavMail POP/SMTP/Caldav/LDAP Exchange Gateway"
+                exec="davmail"
+                icon="/usr/share/davmail/davmail.png"
+                categories="Network;"
+                />
+        <deb todir="dist"
+             package="davmail"
+             section="mail"
+             depends="openjdk-7-jre|openjdk-6-jre|sun-java6-jre,libswt-gtk-3-java|libswt-gtk-3.6-java|libswt-gtk-3.5-java|libswt-gtk-3.4-java">
+            <version upstream="${release}"/>
+            <maintainer email="mguessan@free.fr" name="Mickaël Guessant"/>
+            <description synopsis="DavMail POP/IMAP/SMTP/Caldav/Carddav/LDAP Exchange Gateway">
+                Ever wanted to get rid of Outlook ? DavMail is a POP/IMAP/SMTP/Caldav/Carddav/LDAP exchange
+                gateway allowing users to use any mail/calendar client (e.g. Thunderbird with Lightning or
+                Apple iCal) with an Exchange server, even from the internet or behind a firewall through
+                Outlook Web Access.
+                DavMail now includes an LDAP gateway to Exchange global address book and user personal
+                contacts to allow recipient address completion in mail compose window and full calendar
+                support with attendees free/busy display.
+                The main goal of DavMail is to provide standard compliant protocols in front of proprietary
+                Exchange. This means LDAP for global address book, SMTP to send messages, IMAP to browse
+                messages on the server in any folder, POP to retrieve inbox messages only, Caldav for
+                calendar support and Carddav for personal contacts sync.
+                Thus any standard compliant client can be used with Microsoft Exchange.
+                DavMail gateway is implemented in java and should run on any platform. Releases are tested
+                on Windows, Linux (Ubuntu) and Mac OSX. Tested successfully with the Iphone
+                (gateway running on a server).
+
+                http://davmail.sourceforge.net
+            </description>
+            <tarfileset dir="dist" prefix="usr/share/davmail">
+                <include name="lib/*.jar"/>
+                <include name="*.jar"/>
+                <!-- exclude swt jars from debian package -->
+                <exclude name="lib/swt*.jar"/>
+                <exclude name="lib/libgrowl-*.jar"/>
+            </tarfileset>
+            <tarfileset dir="src/bin" prefix="usr/bin" filemode="755">
+                <include name="davmail"/>
+            </tarfileset>
+            <tarfileset dir="dist" prefix="usr/share/davmail">
+                <include name="davmail.png"/>
+            </tarfileset>
+            <tarfileset dir="dist" prefix="usr/share/applications">
+                <include name="davmail.desktop"/>
+            </tarfileset>
+        </deb>
+    </target>
+
+    <target name='dist-rpm'>
+        <taskdef name='redline' classname='org.freecompany.redline.ant.RedlineTask'>
+            <classpath location="lib/redline-1.1.9.jar"/>
+        </taskdef>
+
+        <redline name='davmail'
+             summary='DavMail POP/IMAP/SMTP/Caldav/Carddav/LDAP Exchange Gateway'
+             version='${release}'
+             release='1'
+             license='GPL'
+             group='Applications/Internet'
+             sourcePackage='davmail-${release}.src.rpm'
+             description='Ever wanted to get rid of Outlook ? DavMail is a POP/IMAP/SMTP/Caldav/Carddav/LDAP exchange
+                gateway allowing users to use any mail/calendar client (e.g. Thunderbird with Lightning or
+                Apple iCal) with an Exchange server, even from the internet or behind a firewall through
+                Outlook Web Access.
+                DavMail now includes an LDAP gateway to Exchange global address book and user personal
+                contacts to allow recipient address completion in mail compose window and full calendar
+                support with attendees free/busy display.
+                The main goal of DavMail is to provide standard compliant protocols in front of proprietary
+                Exchange. This means LDAP for global address book, SMTP to send messages, IMAP to browse
+                messages on the server in any folder, POP to retrieve inbox messages only, Caldav for
+                calendar support and Carddav for personal contacts sync.
+                Thus any standard compliant client can be used with Microsoft Exchange.
+                DavMail gateway is implemented in java and should run on any platform. Releases are tested
+                on Windows, Linux (Ubuntu) and Mac OSX. Tested successfully with the Iphone
+                (gateway running on a server).'
+             url='http://davmail.sourceforge.net'
+             vendor='Mickael Guessant'
+             destination='dist'>
+            <depends name="jre" version="1.6"/>
+            <zipfileset dir="dist" prefix="usr/share/davmail">
+                <include name="lib/*.jar"/>
+                <include name="*.jar"/>
+                <!-- exclude swt jars from package -->
+                <exclude name="lib/swt*.jar"/>
+                <exclude name="lib/libgrowl-*.jar"/>
+            </zipfileset>
+            <zipfileset dir="src/bin" prefix="usr/bin" filemode="755">
+                <include name="davmail"/>
+            </zipfileset>
+            <zipfileset dir="dist" prefix="usr/share/davmail">
+                <include name="davmail.png"/>
+            </zipfileset>
+            <zipfileset dir="dist" prefix="usr/share/applications">
+                <include name="davmail.desktop"/>
+            </zipfileset>
+        </redline>
+
+    </target>
+
+
+    <target name="dist" depends="compile">
+        <property name="release-name" value="${release}-trunk"/>
+        <delete dir="dist"/>
+        <mkdir dir="dist"/>
+        <echo file="dist/version.txt" message="${release}"/>
+        <pathconvert property="manifest-classpath" pathsep=" ">
+            <mapper>
+                <chainedmapper>
+                    <!-- remove absolute path -->
+                    <flattenmapper/>
+                    <globmapper from="*" to="lib/*"/>
+                </chainedmapper>
+            </mapper>
+            <path>
+                <fileset dir="lib">
+                    <include name="*.jar"/>
+                    <exclude name="ant-deb*.jar"/>
+                    <exclude name="jarbundler-*.jar"/>
+                    <exclude name="jsmoothgen-ant-*.jar"/>
+                    <exclude name="junit-*.jar"/>
+                    <exclude name="libgrowl-*.jar"/>
+                    <exclude name="nsisant-*.jar"/>
+                    <exclude name="redline-*.jar"/>
+                    <exclude name="servlet-api-*.jar"/>
+                    <exclude name="swt-*.jar"/>
+                    <exclude name="winrun4j-*.jar"/>
+                </fileset>
+            </path>
+        </pathconvert>
+        <jar basedir="target/classes" destfile="dist/davmail.jar">
+            <manifest>
+                <attribute name="Main-Class" value="davmail.DavGateway"/>
+                <attribute name="Class-Path" value="${manifest-classpath}"/>
+                <section name="davmail/">
+                    <attribute name="Implementation-Title" value="DavMail Gateway"/>
+                    <attribute name="Implementation-Version" value="${release-name}"/>
+                    <attribute name="Implementation-Vendor" value="Mickael Guessant"/>
+                </section>
+            </manifest>
+        </jar>
+        <copy todir="dist/lib">
+            <fileset dir="lib">
+                <include name="*.jar"/>
+                <include name="*.jnilib"/>
+                <exclude name="nsisant*.jar"/>
+                <exclude name="jsmoothgen-ant-*.jar"/>
+                <exclude name="jarbundler-*.jar"/>
+                <exclude name="servlet-api.jar"/>
+                <exclude name="ant-deb-*.jar"/>
+                <exclude name="redline-*.jar"/>
+            </fileset>
+        </copy>
+        <copy file="src/java/tray48.png" tofile="dist/davmail.png"/>
+        <copy file="davmail.sh" todir="dist"/>
+
+        <!-- use WinRun4J wrappers -->
+        <copy file="src/winrun4j/davmail.exe" todir="dist"/>
+        <copy file="src/winrun4j/davmailconsole.exe" todir="dist"/>
+        <copy file="src/winrun4j/davmailservice.exe" todir="dist"/>
+        <copy file="src/winrun4j/davmail64.exe" todir="dist"/>
+        <copy file="src/winrun4j/davmailservice64.exe" todir="dist"/>
+
+        <zip file="dist/davmail-${release-name}.zip">
+            <fileset dir="dist">
+                <include name="lib/*.jar"/>
+                <include name="*.jar"/>
+                <include name="davmail.desktop"/>
+                <include name="davmail.sh"/>
+                <!-- exclude swt jars from platform independent package -->
+                <exclude name="lib/swt*.jar"/>
+                <exclude name="lib/libgrowl-*.jar"/>
+                <exclude name="lib/junit-*.jar"/>
+                <exclude name="lib/winrun4j-*.jar"/>
+            </fileset>
+        </zip>
+        <copy todir="dist/web">
+            <fileset dir="src/web"/>
+        </copy>
+        <copy todir="dist/web/WEB-INF/lib">
+            <fileset dir="dist">
+                <include name="*.jar"/>
+            </fileset>
+            <fileset dir="dist/lib">
+                <include name="*.jar"/>
+                <exclude name="nsisant*.jar"/>
+                <exclude name="jsmoothgen-ant*.jar"/>
+                <exclude name="swt*.jar"/>
+                <exclude name="lib/libgrowl-*.jar"/>
+            </fileset>
+        </copy>
+        <jar destfile="dist/davmail-${release-name}.war">
+            <fileset dir="dist/web"/>
+        </jar>
+        <tar tarfile="dist/davmail-linux-x86-${release-name}.tgz" compression="gzip">
+            <tarfileset prefix="davmail-linux-x86-${release}" dir="dist" filemode="755">
+                <include name="davmail.sh"/>
+            </tarfileset>
+            <tarfileset prefix="davmail-linux-x86-${release}" dir="dist">
+                <include name="davmail.desktop"/>
+                <include name="lib/*.jar"/>
+                <include name="*.jar"/>
+                <include name="lib/swt-*-gtk-linux-x86.jar"/>
+                <exclude name="lib/swt-*-gtk-linux-x86_64.jar"/>
+                <exclude name="lib/swt-*-carbon-macosx.jar"/>
+                <exclude name="lib/swt-*-win32-*.jar"/>
+                <exclude name="lib/libgrowl-*.jar"/>
+            </tarfileset>
+        </tar>
+        <tar tarfile="dist/davmail-linux-x86_64-${release-name}.tgz" compression="gzip">
+            <tarfileset prefix="davmail-linux-x86_64-${release}" dir="dist" filemode="755">
+                <include name="davmail.sh"/>
+            </tarfileset>
+            <tarfileset prefix="davmail-linux-x86_64-${release}" dir="dist">
+                <include name="davmail.desktop"/>
+                <include name="lib/*.jar"/>
+                <include name="*.jar"/>
+                <include name="lib/swt-*-gtk-linux-x86_64.jar"/>
+                <exclude name="lib/swt-*-gtk-linux-x86.jar"/>
+                <exclude name="lib/swt-*-carbon-macosx.jar"/>
+                <exclude name="lib/swt-*-win32-*.jar"/>
+                <exclude name="lib/libgrowl-*.jar"/>
+            </tarfileset>
+        </tar>
+        <zip file="dist/davmail-${release-name}-windows-noinstall.zip">
+            <fileset dir="dist">
+                <include name="lib/*.jar"/>
+                <include name="*.jar"/>
+                <include name="davmail*.exe"/>
+                <exclude name="lib/swt-*-gtk-*.jar"/>
+                <exclude name="lib/libgrowl-*.jar"/>
+                <exclude name="lib/junit-*.jar"/>
+            </fileset>
+        </zip>
+        <antcall target="dist-nsis"/>
+        <antcall target="dist-deb"/>
+        <antcall target="dist-rpm"/>
+        <antcall target="dist-osx"/>
+        <!-- source package -->
+        <tar tarfile="dist/davmail-src-${release-name}.tgz" compression="gzip" longfile="gnu">
+            <tarfileset prefix="davmail-src-${release-name}" dir=".">
+                <include name="**/*"/>
+                <exclude name="build.log"/>
+                <exclude name="dist/**"/>
+                <exclude name="target/**"/>
+                <exclude name="archive/**"/>
+            </tarfileset>
+        </tar>
+    </target>
+
+    <target name='fix-site'>
+        <!-- fix site title generated by mvn site -->
+        <replaceregexp match="Maven - "
+                       replace="">
+            <fileset dir="target/site"/>
+        </replaceregexp>
+        <replaceregexp match="&lt;a href=&quot;http://sourceforge.net/projects/davmail&quot; id=&quot;bannerRight&quot;&gt;"
+                       replace="&lt;script type=&quot;text/javascript&quot;&gt;&lt;!-- ${line.separator}var pkBaseURL = ((&quot;https:&quot; == document.location.protocol) ? &quot;https://sourceforge.net/apps/piwik/davmail/&quot; : &quot;http://sourceforge.net/apps/piwik/davmail/&quot;); ${line.separator}document.write(unescape(&quot;%3Cscript src='&quot; + pkBaseURL + &quot;piwik.js' type='text/javascript'%3E%3C/script%3E&quot;)); ${line.separator}//--&gt;&lt;/script&gt;${line.separator}&lt;script type=&quot;text/javascript&quot;&gt;${line.separator}try {var piwikTracker = Piwik.getTracker(pkBaseURL + &quot;piwik.php&quot;, 1);piwikTracker.trackPageView();piwikTracker.enableLinkTracking();}catch(err){}${line.separator}&lt;/script&gt;&lt;noscript&gt;&lt;p&gt;&lt;img src=&quot;http://sourceforge.net/apps/piwik/davmail/piwik.php?idsite=1&quot; style=&quot;border:0&quot; alt=&quot;&quot;/&gt;&lt;/p&gt;&lt;/noscript&gt;">
+            <fileset dir="target/site"/>
+        </replaceregexp>
+    </target>
+
+    <target name='upload-site' depends="fix-site">
+        <scp todir="${username},davmail@web.sourceforge.net:htdocs"
+             keyfile="${keyfile}" passphrase="${passphrase}" verbose="true" trust="true">
+            <fileset dir="target/site"/>
+        </scp>
+    </target>
+
+    <target name="upload-release" depends="release">
+        <mkdir dir="dist/${version}"/>
+        <move todir="dist/${version}">
+            <fileset dir="dist">
+                <include name="*${version}-*"/>
+            </fileset>
+        </move>
+
+        <scp todir="${username},davmail@frs.sourceforge.net:/home/frs/project/d/da/davmail/davmail"
+             keyfile="${keyfile}" passphrase="${passphrase}" verbose="true" trust="true">
+            <fileset dir="dist">
+                <include name="${version}/*"/>
+            </fileset>
+        </scp>
+    </target>
+
+    <target name="upload-version">
+        <scp todir="${username},davmail@web.sourceforge.net:htdocs"
+             keyfile="${keyfile}" passphrase="${passphrase}" verbose="true">
+            <fileset dir="dist">
+                <include name="version.txt"/>
+            </fileset>
+        </scp>
+    </target>
+
+    <target name="release" depends="init">
+        <property name="release-name" value="${release}"/>
+        <antcall target="dist"/>
+    </target>
+</project>
