@@ -1,0 +1,22 @@
+Release guide :
+- update roadmap
+- update releasenotes.txt from svn log
+- change version in build.xml and pom.xml, commit
+- update staging (clean checkout) directory
+- launch ant release, check generated packages
+- upload packages: ant upload-release
+- make sure swt and jcifs are available in local maven repository:
+mvn install:install-file -DgroupId=org.eclipse -DartifactId=swt -Dversion=3.7.0 -Dpackaging=jar -Dfile=lib/swt-3.7-win32-x86.jar
+mvn install:install-file -DgroupId=org.samba.jcifs -DartifactId=jcifs -Dversion=1.3.14 -Dpackaging=jar -Dfile=lib/jcifs-1.3.14.jar
+mvn install:install-file -DgroupId=javax.mail -DartifactId=mail -Dversion=1.4.3 -Dpackaging=jar -Dfile=lib/mail-1.4.3.jar
+mvn install:install-file -DgroupId=net.freeutils.charset -DartifactId=jcharset -Dversion=1.3 -Dpackaging=jar -Dfile=lib/jcharset-1.3.jar
+mvn install:install-file -DgroupId=org.boris.winrun4j -DartifactId=winrun4j -Dversion=0.4.4 -Dpackaging=jar -Dfile=lib/winrun4j-0.4.4.jar
+- generate site: mvn site
+- upload site: ant upload-site
+- upload releasenotes.txt to sourceforge
+- create tag in subversion
+- create news message at https://sourceforge.net/news/admin/?group_id=184600
+- send user mailing list message
+- change default download files on frs
+- upload version.txt with ant upload-version
+- create new version in sourceforge bug tracker
