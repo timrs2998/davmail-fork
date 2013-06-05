@@ -1,0 +1,216 @@
+<?xml version="1.0"?>
+<document xmlns="http://maven.apache.org/XDOC/2.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/XDOC/2.0 http://maven.apache.org/xsd/xdoc-2.0.xsd">
+
+    <properties>
+        <title>DavMail POP/IMAP/SMTP/Caldav/Carddav/LDAP Exchange Gateway - Server setup</title>
+        <author email="mguessan@free.fr">Mickael Guessant</author>
+    </properties>
+
+    <body>
+
+        <section name="DavMail Setup as a standalone server">
+            <p>Prerequisite : Sun JRE 5, 6 or 7 or OpenJDK 6 or 7.
+            </p>
+
+            <p>Davmail Gateway can run in server mode as a gateway between the mail
+                client and the Outlook Web Access (Exchange) server.
+                In server mode Davmail can run on any Java supported platform.
+                This mode was tested successfully with the Iphone and should work with
+                any phone with POP/IMAP/SMTP/LDAP/Caldav/Carddav client.
+                In this mode many users can share the same DavMail instance.
+            </p>
+
+            <p>Download the generic DavMail package from Sourceforge and uncompress it with
+                your favorite tool, e.g. on Linux:&#x20;<code>unzip davmail-*.zip</code>.
+            </p>
+            <p>Prepare a davmail.properties file according to your local needs :
+            </p>
+            <source><![CDATA[
+# DavMail settings, see http://davmail.sourceforge.net/ for documentation
+
+#############################################################
+# Basic settings
+
+# Server or workstation mode
+davmail.server=true
+# connection mode auto, EWS or WebDav
+davmail.enableEws=auto
+# base Exchange OWA or EWS url
+davmail.url=https://owa.example.com/owa/
+
+# Listener ports
+davmail.caldavPort=1080
+davmail.imapPort=1143
+davmail.ldapPort=1389
+davmail.popPort=1110
+davmail.smtpPort=1025
+
+#############################################################
+# Network settings
+
+# Network proxy settings
+davmail.enableProxy=false
+davmail.useSystemProxies=false
+davmail.proxyHost=
+davmail.proxyPort=
+davmail.proxyUser=
+davmail.proxyPassword=
+
+# proxy exclude list
+davmail.noProxyFor=
+
+# allow remote connection to DavMail
+davmail.allowRemote=false
+# bind server sockets to a specific address
+davmail.bindAddress=
+# client connections SO timeout in seconds
+davmail.clientSoTimeout=
+
+# DavMail listeners SSL configuration
+davmail.ssl.keystoreType=
+davmail.ssl.keystoreFile=
+davmail.ssl.keystorePass=
+davmail.ssl.keyPass=
+
+# Accept specified certificate even if invalid according to trust store
+davmail.server.certificate.hash=
+
+# disable SSL for specified listeners
+davmail.ssl.nosecurecaldav=false
+davmail.ssl.nosecureimap=false
+davmail.ssl.nosecureldap=false
+davmail.ssl.nosecurepop=false
+davmail.ssl.nosecuresmtp=false
+
+# disable update check
+davmail.disableUpdateCheck=true
+
+#############################################################
+# Caldav settings
+
+# override default alarm sound
+davmail.caldavAlarmSound=
+# retrieve calendar events not older than 90 days
+davmail.caldavPastDelay=90
+# WebDav only: force event update to trigger ActiveSync clients update
+davmail.forceActiveSyncUpdate=false
+
+#############################################################
+# IMAP settings
+
+# Delete messages immediately on IMAP STORE \Deleted flag
+davmail.imapAutoExpunge=true
+# Enable IDLE support, set polling delay in minutes
+davmail.imapIdleDelay=
+
+#############################################################
+# POP settings
+
+# Delete messages on server after 30 days
+davmail.keepDelay=30
+# Delete messages in server sent folder after 90 days
+davmail.sentKeepDelay=90
+# Mark retrieved messages read on server
+davmail.popMarkReadOnRetr=false
+
+#############################################################
+# SMTP settings
+
+# let Exchange save a copy of sent messages in Sent folder
+davmail.smtpSaveInSent=true
+
+#############################################################
+# Loggings settings
+
+# log file path, leave empty for default path
+davmail.logFilePath=/var/log/davmail.log
+# maximum log file size, use Log4J syntax, set to 0 to use an external rotation mechanism, e.g. logrotate
+davmail.logFileSize=1MB
+# log levels
+log4j.logger.davmail=WARN
+log4j.logger.httpclient.wire=WARN
+log4j.logger.org.apache.commons.httpclient=WARN
+log4j.rootLogger=WARN
+
+#############################################################
+# Workstation only settings
+
+# smartcard access settings
+davmail.ssl.pkcs11Config=
+davmail.ssl.pkcs11Library=
+
+# SSL settings for mutual authentication
+davmail.ssl.clientKeystoreType=
+davmail.ssl.clientKeystoreFile=
+davmail.ssl.clientKeystorePass=
+
+# disable all balloon notifications
+davmail.disableGuiNotifications=false
+# disable startup balloon notifications
+davmail.showStartupBanner=true
+
+# enable transparent client Kerberos authentication
+davmail.enableKerberos=false]]>
+            </source>
+            <p>See
+                <a href="gettingstarted.html">Getting started</a>
+                for more information on
+                the options. Make sure davmail.server is set to true (no icon tray) and allow
+                remote connections: davmail.allowRemote=true.
+            </p>
+            <p>To disable a service, set an empty port value.</p>
+            <p>Launch Davmail with the following command:
+                <source>nohup davmail.sh davmail.properties &amp;</source>.
+            </p>
+            <p>Then check messages:
+                <source>tail -f nohup.out</source>
+            </p>
+        </section>
+
+        <section name="Register DavMail windows service">
+            <p>A new WinRun4J davmailservice.exe wrapper is available in the windows
+                package.
+            </p>
+            <p>To register DavMail as a windows service, use:
+                <source>davmailservice --WinRun4J:RegisterService</source>
+                or
+                <source>sc create DavMail binPath= \path\to\davmailservice.exe type= own start= auto</source>
+            </p>
+        </section>
+
+        <section name="DavMail Setup as a JEE Web Application">
+            <p>Prerequisites : Sun JRE 5, 6 or 7 or OpenJDK 6 or 7 and any JEE compliant web container
+            </p>
+
+            <p>Davmail Gateway can now be deployed in any JEE application server using
+                the war package. In this mode, DavMail listener threads run inside the
+                application server and follow the web application lifecycle (start,
+                stop, deploy, undeploy). The following items describe Tomcat deployment,
+                details will vary according to the specific application server available.
+            </p>
+
+            <p>Download the war DavMail package from Sourceforge<code>davmail-*.war</code>,
+                and deploy it inside the application server. In Tomcat, this means copy the
+                war file to the webapps directory. If Tomcat is started and automatic
+                deployment enabled (this is the default configuration), the package is
+                automatically uncompressed and started.
+            </p>
+            <p>The davmail.properties configuration file is then available under
+                <code>davmail-*/WEB-INF/classes</code>.
+            </p>
+
+            <p>Note: DavMail does not use the standard Tomcat HTTP connector and uses the same listeners
+                in war and server modes. This means the HTTP port for Caldav url is specified in davmail.properties
+            </p>
+
+            <p>See above and
+                <a href="gettingstarted.html">Getting started</a>
+                for more information on
+                the options. Make sure davmail.server is set to true (no icon tray) and allow
+                remote connections: davmail.allowRemote=true.
+            </p>
+        </section>
+    </body>
+</document>
