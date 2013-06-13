@@ -1,0 +1,145 @@
+<?xml version="1.0"?>
+<document xmlns="http://maven.apache.org/XDOC/2.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/XDOC/2.0 http://maven.apache.org/xsd/xdoc-2.0.xsd">
+
+    <properties>
+        <title>DavMail POP/IMAP/SMTP/Caldav/Carddav/LDAP Exchange Gateway - iPhone Mail setup</title>
+        <author email="mguessan@free.fr">Mickael Guessant</author>
+    </properties>
+
+    <body>
+
+        <section name="iPhone Mail setup">
+            <p>Note: you can't install DavMail directly on an iPhone, you need a separate DavMail server,
+                see&#x20;<a href="iphonesetup.html">iPhone setup</a>.
+            </p>
+
+            <subsection name="Create a new account">
+                <p>Open iPhone Settings application and choose Mail, Contacts, Calendar:
+                </p>
+                <div style="width: 100%;text-align: center">
+                    <img src="images/iphone/iphoneAccount1.png" alt=""/>
+                </div>
+
+                <p>Then select Add Account...:
+                </p>
+                <div style="width: 100%;text-align: center">
+                    <img src="images/iphone/iphoneAccount2.png" alt=""/>
+                </div>
+
+                <p>DavMail is not an Exchange ActiveSync server, press Other:
+                </p>
+                <div style="width: 100%;text-align: center">
+                    <img src="images/iphone/iphoneAccount3.png" alt=""/>
+                </div>
+
+                <p>Choose Add Mail Account:
+                </p>
+                <div style="width: 100%;text-align: center">
+                    <img src="images/iphone/iphoneMail01.png" alt=""/>
+                </div>
+
+                <p>Enter your name, email address and password, then press Next:
+                </p>
+                <div style="width: 100%;text-align: center">
+                    <img src="images/iphone/iphoneMail02.png" alt=""/>
+                </div>
+
+                <p>Select IMAP account type:
+                </p>
+                <div style="width: 100%;text-align: center">
+                    <img src="images/iphone/iphoneMail03.png" alt=""/>
+                </div>
+
+                <p>In Incoming Mail Server section, enter your DavMail server hostname,
+                    append ':' and port if DavMail IMAP port is not 143:
+                </p>
+                <div style="width: 100%;text-align: center">
+                    <img src="images/iphone/iphoneMail04.png" alt=""/>
+                </div>
+
+                <p>In Outgoing Mail Server section, enter your DavMail server hostname,
+                    <em>do not append port, this is not supported by current iOS version</em>, then press Next:
+                </p>
+                <div style="width: 100%;text-align: center">
+                    <img src="images/iphone/iphoneMail05.png" alt=""/>
+                </div>
+
+                <p>Wait until your iPhone has finished verifying all possible port/protocol combination:
+                </p>
+                <div style="width: 100%;text-align: center">
+                    <img src="images/iphone/iphoneMail06.png" alt=""/>
+                </div>
+
+                <p>If you get the
+                    <em>Cannot Connect Using SSL</em>
+                    message, just select Yes,
+                    you will just need to adjust account settings later.
+                </p>
+                <div style="width: 100%;text-align: center">
+                    <img src="images/iphone/iphoneMail07.png" alt=""/>
+                </div>
+
+                <p>Save the account:
+                </p>
+                <div style="width: 100%;text-align: center">
+                    <img src="images/iphone/iphoneMail08.png" alt=""/>
+                </div>
+
+                <p>Confirm:
+                </p>
+                <div style="width: 100%;text-align: center">
+                    <img src="images/iphone/iphoneMail09.png" alt=""/>
+                </div>
+
+                <p>Back to account settings page, still need to fix SMTP port
+                    if DavMail is not listening on default port 25,
+                    open account settings:
+                </p>
+                <div style="width: 100%;text-align: center">
+                    <img src="images/iphone/iphoneMail10.png" alt=""/>
+                </div>
+
+                <p>Open Account Info:
+                </p>
+                <div style="width: 100%;text-align: center">
+                    <img src="images/iphone/iphoneMail11.png" alt=""/>
+                </div>
+                <p>Open SMTP page:
+                </p>
+                <div style="width: 100%;text-align: center">
+                    <img src="images/iphone/iphoneMail12.png" alt=""/>
+                </div>
+                <p>Choose primary server:
+                </p>
+                <div style="width: 100%;text-align: center">
+                    <img src="images/iphone/iphoneMail13.png" alt=""/>
+                </div>
+                <p>Adjust SMTP port:
+                </p>
+                <div style="width: 100%;text-align: center">
+                    <img src="images/iphone/iphoneMail14.png" alt=""/>
+                </div>
+                <p>Back to Account Info, open Advanced settings:
+                </p>
+                <div style="width: 100%;text-align: center">
+                    <img src="images/iphone/iphoneMail15.png" alt=""/>
+                </div>
+                <p>Back to Account Info, open Advanced settings:
+                </p>
+                <div style="width: 100%;text-align: center">
+                    <img src="images/iphone/iphoneMail15.png" alt=""/>
+                </div>
+                <p>Enable SSL on IMAP port:
+                </p>
+                <div style="width: 100%;text-align: center">
+                    <img src="images/iphone/iphoneMail16.png" alt=""/>
+                </div>
+                <p>Mail setup is complete, proceed to
+                    <a href="iphonecarddavsetup.html">iPhone Carddav setup</a>
+                </p>
+            </subsection>
+        </section>
+    </body>
+</document>

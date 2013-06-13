@@ -1,0 +1,118 @@
+<?xml version="1.0"?>
+<document xmlns="http://maven.apache.org/XDOC/2.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/XDOC/2.0 http://maven.apache.org/xsd/xdoc-2.0.xsd">
+
+    <properties>
+        <title>DavMail POP/IMAP/SMTP/Caldav/Carddav/LDAP Exchange Gateway - SSL setup</title>
+        <author email="mguessan@free.fr">Mickael Guessant</author>
+    </properties>
+
+    <body>
+
+        <section name="SSL setup">
+            <subsection name="Server keystore (Client to DavMail)">
+                <p>SSL is not necessary when DavMail is used in workstation mode, as communication between clients and
+                    DavMail remain local. However, in server (shared) mode e.g. with a smartphone connecting to DavMail
+                    over the internet, you should make sure encryption is enabled.
+                </p>
+
+                <p>The simplest way to secure communication between mail/calendar clients and DavMail is to create a
+                    self signed certificate:
+                </p>
+                <source>keytool -genkey -keyalg rsa -keysize 2048 -storepass password -keystore davmail.p12 -storetype
+                    pkcs12 -validity 3650 -dname cn=davmailhostname.company.com,ou=davmail,o=sf,o=net
+                </source>
+
+                <p>Note to iPhone users: iOS does not support the default DSA algorithm, make sure you use an RSA key
+                    pair
+                </p>
+
+                <p>Another note : do not use blank passwords, both keystore and key passwords must be set</p>
+
+                <p>If you have an official certificate in PEM form, convert it to PKCS12 with the following command:</p>
+                <source>openssl pkcs12 -export -in cert-davmail.pem -inkey privatekey-davmail.key -certfile
+                    chain-davmail.pem -out davmail.p12
+                </source>
+
+                <p>Then add this keystore to DavMail settings:
+                </p>
+                <source><![CDATA[
+davmail.ssl.keystoreType=PKCS12
+davmail.ssl.keyPass=password
+davmail.ssl.keystoreFile=davmail.p12
+davmail.ssl.keystorePass=password]]></source>
+                <p>If your already have your keystore in JKS format, just set keystoreType to JKS in DavMail
+                    settings. keystorePass is the password used to open the KeyStore, keyPass protects the private key
+                    inside the KeyStore. With PKCS12, keyPass and keystorePass are often identical.
+                </p>
+                <p>Restart DavMail, all DavMail listeners will switch to secure mode: POP3S/IMAPS/SMTPS/HTTPS/LDAPS.
+                    You will also need to enable SSL in client applications and manually accept the certificate as it's
+                    not signed by a trusted Certification Authority.
+                </p>
+            </subsection>
+
+            <subsection name="DavMail to Exchange">
+                <p>
+                    <strong>Custom certificate authority</strong>
+                </p>
+                <p>Most users rely on the interactive accept certificate dialog to handle non public certificate authorities.
+                    However, this will not work with an Exchange server cluster with a different certificate on each server.
+                    In this case, you need to update global Java truststore with the custom certificate authority:
+                </p>
+                <source>keytool -import -alias root -keystore /path/to/jre/lib/security/cacerts -trustcacerts -file rootca.crt -storepass changeit -noprompt</source>
+                <p>
+                    <strong>Client certificate</strong>
+                </p>
+                <p>In most cases, using https in OWA url is enough to secure communication between DavMail and Exchange.
+                    However, with Exchange servers setup to require mutual authentication, you will have to register
+                    your client certificate in DavMail settings, either through PKCS11 (smartcard) or file certificate.
+                </p>
+                <p>To use a client certificate provided as a PKCS12 file, set the following keys in DavMail:</p>
+                <source><![CDATA[
+davmail.ssl.clientKeystoreType=PKCS12
+davmail.ssl.clientKeystoreFile=client.p12
+davmail.ssl.clientKeystorePass=password]]></source>
+                <p>For a smartcard, first make sure you PKCS11 module is correctly installed by testing mutual
+                    authentication through a browser. Then set the following properties in DavMail:</p>
+                <source><![CDATA[
+davmail.ssl.clientKeystoreType=PKCS11
+davmail.ssl.pkcs11Library=/full/path/to/pkcs11Module
+davmail.ssl.pkcs11Config=]]></source>
+                <p>PKCS11 library is the full path to the PKCS11 module (.so on Unix, .dll on windows) or simple
+                    library name if PATH (Windows) or LD_LIBRARY_PATH (Unix) already contains the full path. Add any
+                    additional PKCS11 parameter in PKCS11 Config parameter, e.g. <code>slot = 2</code>.
+                </p>
+                <p>To adjust your settings, you can try to access the smartcard with java keytool. First create a file
+                    named pkcs11.config with the following lines:</p>
+                <source><![CDATA[
+name = moduleName
+library = /path/to/pkcs11module]]></source>
+                <p>and list certificates with keytool:</p>
+                <source>keytool -keystore NONE -storetype PKCS11 -providerClass sun.security.pkcs11.SunPKCS11 -providerArg pkcs11.config -list -v</source>
+
+                <p>Sample pkcs11.config for NSS Soft token (Thunderbird/Firefox):</p>
+<source><![CDATA[
+name=NSS
+library=softokn3
+nssArgs="configdir='/path/to/firefox/profile' certPrefix='' keyPrefix='' secmod='secmod.db' flags=readOnly"
+slot = 2
+]]></source>
+
+                <p>Another one for Coolkey (see <a href="http://pkg-coolkey.alioth.debian.org/">Coolkey for Debian</a>
+                    and <a href="http://www7320.nrlssc.navy.mil/pubs/2006/CommonAccessCardLinux.pdf">United States Department of Defense Common Access Cards</a>):</p>
+<source><![CDATA[
+name=CoolKey
+library=/usr/cac/lib/pkcs11/libcoolkeypk11.so
+]]></source>
+                <p>Note that spaces in library path may break Sun PKCS11, use <code>C:\Progra~2\ActivIdentity\ActivClient\acpkcs211.dll</code>
+                instead of <code>C:\Program Files (x86)\ActivIdentity\ActivClient\acpkcs211.dll</code></p>
+
+                <p>More details on java PKCS11 setup in
+                    <a href="http://java.sun.com/javase/6/docs/technotes/guides/security/p11guide.html">Sun PKCS11 guide</a>
+                </p>
+
+            </subsection>
+        </section>
+    </body>
+</document>
