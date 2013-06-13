@@ -30,7 +30,6 @@ import davmail.exception.HttpNotFoundException;
 import davmail.exception.InsufficientStorageException;
 import davmail.exchange.ExchangeSession;
 import davmail.exchange.ExchangeSessionFactory;
-import davmail.exchange.FolderLoadThread;
 import davmail.exchange.MessageLoadThread;
 import davmail.ui.tray.DavGatewayTray;
 import davmail.util.IOUtil;
@@ -57,6 +56,28 @@ public class ImapConnection extends AbstractConnection {
 
     protected String baseMailboxPath;
     ExchangeSession.Folder currentFolder;
+
+    class FolderLoadThread extends Thread {
+        boolean isComplete = false;
+        ExchangeSession.Folder folder;
+        IOException exception;
+
+        FolderLoadThread(String threadName, ExchangeSession.Folder folder) {
+            super(threadName + "-LoadFolder");
+            setDaemon(true);
+            this.folder = folder;
+        }
+
+        public void run() {
+            try {
+                folder.loadMessages();
+            } catch (IOException e) {
+                exception = e;
+            } finally {
+                isComplete = true;
+            }
+        }
+    }
 
     /**
      * Initialize the streams and start the thread.
@@ -230,10 +251,20 @@ public class ImapConnection extends AbstractConnection {
                                                 sendClient("* " + currentFolder.count() + " EXISTS");
                                             } else {
                                                 // load folder in a separate thread
+                                                FolderLoadThread folderLoadThread = new FolderLoadThread(currentThread().getName(), currentFolder);
+                                                folderLoadThread.start();
                                                 LOGGER.debug("*");
                                                 os.write('*');
-                                                FolderLoadThread.loadFolder(currentFolder, os);
+                                                while (!folderLoadThread.isComplete) {
+                                                    folderLoadThread.join(20000);
+                                                    LOGGER.debug("Still loading " + currentFolder.folderPath+" ("+currentFolder.count()+" messages)");
+                                                    os.write(' ');
+                                                    os.flush();
+                                                }
                                                 sendClient(" " + currentFolder.count() + " EXISTS");
+                                                if (folderLoadThread.exception != null) {
+                                                    throw folderLoadThread.exception;
+                                                }
                                             }
 
                                             sendClient("* " + currentFolder.recent + " RECENT");
@@ -1939,36 +1970,6 @@ public class ImapConnection extends AbstractConnection {
             }
             return nextToken.toString();
         }
-    }
-
-    public void testInvalidHeaders() throws MessagingException {
-        String messageHeaders = "Microsoft Mail Internet Headers Version 2.0\r\n" +
-                "Received: from mail.litwareinc.com ([10.54.108.101]) by mail.proseware.com with Microsoft SMTPSVC(6.0.3790.0);\r\n" +
-                "Wed, 12 Dec 2007 13:39:22 -0800\r\n" +
-                "Received: from mail ([10.54.108.23] RDNS failed) by mail.litware.com with Microsoft SMTPSVC(6.0.3790.0);\r\n" +
-                "Wed, 12 Dec 2007 13:38:49 -0800\r\n" +
-                "From: \"Kelly J. Weadock\" <kelly@litware.com>\n" +
-                "To: <anton@proseware.com>\n" +
-                "Cc: <tim@cpandl.com>\n" +
-                "Subject: Review of staff assignments\n" +
-                "Date: Wed, 12 Dec 2007 13:38:31 -0800\n" +
-                "MIME-Version: 1.0\n" +
-                "Content-Type: multipart/mixed;\n" +
-                "X-Mailer: Microsoft Office Outlook, Build 12.0.4210\n" +
-                "X-MimeOLE: Produced By Microsoft MimeOLE V6.00.2800.1165\n" +
-                "Thread-Index: AcON3CInEwkfLOQsQGeK8VCv3M+ipA==\n" +
-                "Return-Path: kelly@litware.com\n" +
-                "Message-ID: <MAILbbnewS5TqCRL00000013@mail.litware.com>\n" +
-                "X-OriginalArrivalTime: 12 Dec 2007 21:38:50.0145 (UTC)";
-        final String MS_HEADER = "Microsoft Mail Internet Headers Version 2.0\r\n";
-        if (messageHeaders.startsWith(MS_HEADER)) {
-            messageHeaders = messageHeaders.substring(MS_HEADER.length());
-        }
-        Enumeration enumeration = new InternetHeaders(new ByteArrayInputStream(messageHeaders.getBytes())).getAllHeaderLines();
-        while (enumeration.hasMoreElements()) {
-            System.out.println(enumeration.nextElement());
-        }
-
     }
 
 }

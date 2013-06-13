@@ -5,7 +5,7 @@
     <groupId>davmail</groupId>
     <artifactId>davmail</artifactId>
     <packaging>jar</packaging>
-    <version>4.3.3</version>
+    <version>4.3.2</version>
     <name>DavMail POP/IMAP/SMTP/Caldav/Carddav/LDAP Exchange Gateway</name>
     <organization>
         <name>Mickaël Guessant</name>
@@ -135,14 +135,14 @@
         </mailingList>
     </mailingLists>
     <scm>
-        <connection>scm:svn:https://svn.code.sf.net/p/davmail/code/trunk</connection>
-        <developerConnection>scm:svn:svn+ssh://mguessan@svn.code.sf.net/p/davmail/code/trunk</developerConnection>
+        <connection>scm:svn:https://davmail.svn.sourceforge.net/svnroot/davmail/trunk</connection>
+        <developerConnection>scm:svn:https://davmail.svn.sourceforge.net/svnroot/davmail/trunk</developerConnection>
         <tag>HEAD</tag>
-        <url>https://sourceforge.net/p/davmail/code/HEAD/tree/trunk/</url>
+        <url>http://davmail.svn.sourceforge.net/viewvc/davmail/trunk/</url>
     </scm>
     <issueManagement>
         <system>SourceForge</system>
-        <url>http://sourceforge.net/p/davmail/_list/tickets</url>
+        <url>http://sourceforge.net/tracker/?group_id=184600</url>
     </issueManagement>
     <repositories>
         <repository>
