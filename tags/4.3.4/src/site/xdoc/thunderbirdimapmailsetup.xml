@@ -1,0 +1,65 @@
+<?xml version="1.0"?>
+<document xmlns="http://maven.apache.org/XDOC/2.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/XDOC/2.0 http://maven.apache.org/xsd/xdoc-2.0.xsd">
+
+    <properties>
+        <title>DavMail POP/IMAP/SMTP/Caldav/Carddav/LDAP Exchange Gateway - Thunderbird mail setup</title>
+        <author email="mguessan@free.fr">Mickael Guessant</author>
+    </properties>
+
+    <body>
+
+        <section name="IMAP Thunderbird mail setup">
+            <p>There are two ways to access Exchange emails through DavMail Gateway: the good old
+                and efficient POP protocol, limited to Inbox access and the IMAP protocol that enables
+                full message folder tree access. DavMail IMAP listener has a higher memory footprint.
+            </p>
+
+            <p>This page describes IMAP setup, if you don't need multiple folders access, proceed to
+                <a href="thunderbirdmailsetup.html">
+                    POP Thunderbird mail setup
+                </a>
+                instead.
+            </p>
+
+            <p>DavMail can be used with any IMAP/SMTP client by adjusting the following description designed for
+                Thunderbird. DavMail IMAP support is tested with Thunderbird, Outlook and Apple Mail.
+            </p>
+
+            <subsection name="Create a new account">
+                <p>Choose <code>Add Mail Account...</code> under Account settings and enter name, email address
+                    and password:</p>
+                <div style="width: 100%;text-align: center">
+                    <img src="images/thunderbirdAccount1.png" alt=""/>
+                </div>
+                <p>Click <code>Continue</code> and <code>Manual config</code> without waiting for automatic config:</p>
+                <div style="width: 100%;text-align: center">
+                    <img src="images/thunderbirdAccount2.png" alt=""/>
+                </div>
+
+                <p>Incoming server type is IMAP, server hostname is localhost, default port is 1143, no SSL and normal
+                    password authentication. Outgoing server is localhost, default port is 1025, no SSL and normal
+                    password authentication. Set your username (windows account name or email address) and click
+                    <code>Re-test</code> to validate account settings, then <code>Create Account</code>:
+                </p>
+                <div style="width: 100%;text-align: center">
+                    <img src="images/thunderbirdAccount3.png" alt=""/>
+                </div>
+
+
+                <p>Without SSL you will get the following warning, check box and confirm account creation:
+                </p>
+                <div style="width: 100%;text-align: center">
+                    <img src="images/thunderbirdAccount4.png" alt=""/>
+                </div>
+                <p>Note: as communication between Thunderbird and DavMail is local, cleartext mode is not an issue,
+                    except on shared machines (e.g. Terminal server).</p>
+
+                <p>Proceed to
+                    <a href="thunderbirdcalendarsetup.html">Thunderbird calendar setup</a>
+                </p>
+            </subsection>
+        </section>
+    </body>
+</document>
