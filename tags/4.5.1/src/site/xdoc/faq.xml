@@ -1,0 +1,332 @@
+<?xml version="1.0"?>
+<document xmlns="http://maven.apache.org/XDOC/2.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/XDOC/2.0 http://maven.apache.org/xsd/xdoc-2.0.xsd">
+
+    <properties>
+        <title>DavMail POP/IMAP/SMTP/Caldav/Carddav/LDAP Exchange Gateway - Frequently asked questions</title>
+        <author email="mguessan@free.fr">Mickael Guessant</author>
+    </properties>
+
+    <body>
+
+        <section name="Frequently asked questions">
+            <p>Frequently asked questions on DavMail forums, mailing list or direct email.
+            </p>
+            <subsection name="Feedback">
+                <p>
+                    <strong>How do I create a WIRE debug log ?</strong>
+                </p>
+                <p>In DavMail trackers and forums, I often ask for a WIRE debug log. To create this
+                    log file, you will need to change DavMail settings under the Logging tab.
+                    Set the WIRE logging category to DEBUG level.
+                </p>
+                <p>You can then reproduce your issue and send the log file to
+                    <a href="mailto:mguessan@free.fr">mguessan@free.fr</a>
+                </p>
+                <p>The davmail.log file is available in DavMail working directory on Unix and Windows,
+                    ~/Library/Logs/DavMail/davmail.log on OSX. This default path can be customized with
+                    the
+                    <code>Log File Path</code>
+                    setting.
+                </p>
+                <p>Note: on OSX Lion the Library folder is hidden, a simple way to access it is to launch
+                Console (Finder, Go to Utilities), right click on davmail.log and choose Reveal in Finder.</p>
+            </subsection>
+            <subsection name="General">
+                <p>
+                    <strong>EWS endpoint not available</strong>
+                </p>
+                <p>Unfortunately, this may mean your Exchange administrators blocked EWS access.</p>
+                <p>To check this, try to connect to
+                    <code>https://<i>mail.company.com</i>/ews/exchange.asmx
+                    </code>
+                    in your favorite web browser: you should get an authentication popup. On authentication success,
+                    you should get the EWS wsdl definition. If you don't, please contact the Exchange administrators
+                    to let them fix the broken Exchange server setup.
+                </p>
+                <p>Another way to get EWS endpoint is to use Microsoft provided test page at:</p>
+                <code>https://testconnectivity.microsoft.com</code>
+                <p>Choose Outlook discover section, on test success expand details until you find
+                    POST response with EwsUrl value (internal and external).</p>
+                <p>Once you have this url, set it as OWA address in DavMail and force EWS mode</p>
+                <p>Note: Microsoft Outlook 2011 on OSX and native OSX applications also rely on EWS to connect to
+                    Exchange. Mobile devices (Android phones, iPhones, Windows mobile) use ActiveSync on a different
+                    endpoint.
+                </p>
+                <p>
+                    <strong>Authentication fails with invalid user or password message</strong>
+                </p>
+                <p>Authentication fails with the following message:
+                    <code>Authentication failed: invalid user or password, retry with domain\user</code>
+                </p>
+                <p>Exchange before 2007 expects domain qualified user name, you may not have
+                    to provide the domain name on the logon form if javascript is used to add it,
+                    but DavMail can not execute javascript. Thus you need to prefix your user name
+                    with the Active Directory domain followed by \
+                </p>
+                <p>Note to Mac users: OSX applications do not like username with backslash, you have to set windows
+                    domain name in DavMail advanced settings and use the simple username in client application.
+                </p>
+                <p>
+                    <strong>Authentication fails with error in parsing the status line</strong>
+                </p>
+                <p>Authentication fails with the following message:
+                    <code>error in parsing the status line from the response: unable to find line starting with "HTTP"
+                    </code>
+                </p>
+                <p>Your Exchange server expects HTTPS (secured) connections, use https instead of http in
+                    OWA url.
+                </p>
+                <p>
+                    <strong>Exchange RSA two factor authentication form</strong>
+                </p>
+                <p>Exchange now supports two factor authentication for RSA tokens. This requires two potentially
+                    different user names in fields userid and username. Use a pipe in client to provide both values:
+                    <code>userid|username</code>. In some cases you will need to also provide domain name:
+                    <code>userid|domain\username</code>, do not set default windows domain name.
+                </p>
+                <p>
+                    <strong>Where can I find DavMail settings file ?</strong>
+                </p>
+                <p>The default location for DavMail settings is a file named .davmail.properties in user home
+                    folder. This file is hidden under Linux and OSX. On windows, the user home folder is under
+                    <code>Document and Settings</code>
+                </p>
+                <p>
+                    <strong>How to run multiple instances of DavMail ?</strong>
+                </p>
+                <p>Just create multiple configuration files and provide them as a command line option, see previous
+                    question:
+                </p>
+                <source>
+davmail server1.properties
+davmail server2.properties
+                </source>
+
+            </subsection>
+
+            <subsection name="Exchange setup">
+                <p>
+                    <strong>What are the prerequisites on Exchange server side ?</strong>
+                </p>
+                <p>With Exchange 2003, you only need to have access to OWA (Outlook Web Access), Webdav, Address Book
+                    and public folders are always available. Unfortunately, this is not the case with Exchange 2007.
+                    You must make sure Webdav support is enabled on your server. You can test this by accessing
+                    https://mail.company.com/exchange, which should redirect to /owa. Another important service is the
+                    galfind (address book) access at /public/?Cmd=galfind
+                </p>
+                <p>Additional information for Exchange administrators to enable WebDav:</p>
+                <p>After running through the pre-requisite checker for each server (Front End CAS server and
+                    Back End Mailbox server) and adding the appropriate roles and features, add the following
+                    via the ServerManager:
+                </p>
+                <ul>
+                    <li>Select the IIS role, then add Role Services</li>
+                    <li>Add WebDav Publishing (both Cas server and Mailbox Server)</li>
+                    <li>On the Mailbox server, add the ISAPI extensions Role Service to the IIS role</li>
+                    <li>On the Default Web Site (each server), enable WebDav</li>
+                    <li>Should not have to enable any additional WebDav rules</li>
+                    <li>Install the server roles</li>
+                    <li>Create a test mailbox (see Exchange Docs)</li>
+                </ul>
+                <p>To Test:</p>
+                <ul>
+                    <li>Ensure that Outlook Web Access works by using the https://<i>exchangeServer</i>/owa URL
+                    </li>
+                    <li>Try using the pass through legacy URL: https://<i>exchangeServer</i>/exchange,
+                        if you receive an error 500 “Internal Server Error”, then WebDav is not working.
+                    </li>
+                </ul>
+                <p>
+                    <strong>Is Exchange 2010 supported ?</strong>
+                </p>
+                <p>As Microsoft decided to drop WebDav support in Exchange 2010, I had to implement a new backend from
+                    scratch to support the new Exchange Web Services interface. This support is still experimental,
+                    but is working quite well. However, you still need to enable it manually in .davmail.properties
+                    with the following line:
+                    <br/>
+                    <source>davmail.enableEws=true</source>
+                    <br/>
+                </p>
+                <p>
+                    <strong>Is DavMail based on Outlook protocol ?</strong>
+                </p>
+                <p>Outlook anywhere uses MAPI RPC over HTTPS to access company LAN through the firewall.
+                    DavMail does not use MAPI at all but relies on WebDav (Exchange 2003/2007) or EWS (Exchange
+                    2007/2010) to access Exchange. This means you need direct access over HTTPS to either the OWA WebDav
+                    url (/exchange/mail@company.com) or EWS (/ews/exchange.asmx) to access Exchange with DavMail.
+                </p>
+            </subsection>
+
+            <subsection name="OSX">
+                <p>
+                    <strong>How do I make DavMail start automatically ?</strong>
+                </p>
+                <p>Add DavMail.app to "Login Items", see
+                    <a href="http://docs.info.apple.com/article.html?path=Mac/10.6/en/15189.html">
+                        Opening items automatically when you log in
+                    </a>
+                </p>
+            </subsection>
+
+            <subsection name="Linux">
+                <p>
+                    <strong>Why do I get black on black notifications on Ubuntu ?</strong>
+                </p>
+                <p>This is an SWT bug, upgrade to SWT 3.6, see
+                    <a href="https://sourceforge.net/tracker/?func=detail&amp;atid=909904&amp;aid=3138023&amp;group_id=184600">
+                        On Ubuntu, notify text conflicts with default theme.
+                    </a>
+                    http://users.ox.ac.uk/~richardc/guides/LinuxNexus.html
+                </p>
+                <p>
+                    <strong>DavMail hangs on 64-bit Linux</strong>
+                </p>
+                <p>Disable use system proxies option in DavMail settings
+                </p>
+            </subsection>
+
+
+            <subsection name="Security">
+                <p>
+                    <strong>How do I secure DavMail connections ?</strong>
+                </p>
+                <p>Communication between DavMail and your Exchange server is secured by default as long as you access
+                    OWA over HTTPS.
+                </p>
+                <p>Communication between the messaging client and DavMail is
+                    <em>not</em>
+                    secured by default. This is not an issue in standalone mode as all communication is local, but you
+                    may want to improve this in server (shared) mode.
+                </p>
+                <p>This is quite simple: you just need to get a server certificate in PKCS12 or JKS format and add it in
+                    the key store section in DavMail settings, see&#x20;<a href="sslsetup.html">SSL Setup</a>.
+                </p>
+
+                <p>
+                    <strong>Are my credentials safe ?</strong>
+                </p>
+                <p>DavMail does not store Exchange username or password, they are provided by the messaging client over
+                    IMAP, HTTP, POP, SMTP or LDAP
+                </p>
+            </subsection>
+
+            <subsection name="Caldav (calendar)">
+                <p>
+                    <strong>How do I detect errors in Thunderbird/Lightning calendar ?</strong>
+                </p>
+                <p>Unfortunately, Lightning does not provide much feedback of what is going
+                    on. To detect errors at this level, you may activate calendar log settings
+                    under Tools/Options/Advanced:
+                </p>
+                <source><![CDATA[calendar.debug.log=true
+calendar.debug.log.verbose=true]]></source>
+
+                <p>
+                    <strong>Invalid notifications</strong>
+                </p>
+                <p>Lightning 0.9 mail notifications are broken, activate
+                    Caldav notifications to outbox instead:
+                </p>
+                <p>Check the following parameter in Thunderbird, it should be set to true
+                </p>
+                <source>calendar.caldav.sched.enabled=true</source>
+
+                <p>
+                    <strong>Public calendars</strong>
+                </p>
+                <p>To access public folders in Lightning, the URL scheme is:
+                </p>
+                <source>http://localhost:<i>1080</i>/public/<i>path/to/calendar</i></source>
+                <p>To access public folders in iCal, the URL scheme is:
+                </p>
+                <source>http://localhost:<i>1080</i>/principals/public/<i>path/to/calendar</i></source>
+                <p>Note: iCal does not support folder names with spaces or special characters</p>
+
+                <p>
+                    <strong>Shared calendars</strong>
+                </p>
+                <p>To access a shared calendar in Lightning, the URL scheme is:
+                </p>
+                <source>http://localhost:<i>1080</i>/users/<i>user@company.com</i></source>
+                <p>To access a shared calendar in iCal, the URL scheme is:
+                </p>
+                <source>http://localhost:<i>1080</i>/principals/users/<i>user@company.com</i></source>
+                <p>Note that you need to have access to parent calendar if the target calendar is a child calendar.</p>
+
+            </subsection>
+
+            <subsection name="Mail">
+                <p>
+                    <strong>Timeout errors during IMAP sync (broken pipe)</strong>
+                </p>
+                <p>If you Exchange server is too slow or you don't have enough network bandwidth or too many messages in
+                    a single folder, you may get timeout errors during message fetch.
+                </p>
+                <p>A workaround on DavMail side is to limit folder message count retrieval by setting
+                    <code>davmail.folderSizeLimit</code>. Use this for shared servers with mobile clients to get fast
+                    sync and limit bandwidth usage.
+                </p>
+                <p>To fix the problem in OSX Mail, go to your account setup under preferences.
+                    On the IMAP account having difficulty, go to the advanced tab. Where it says
+                    "keep copies for offline viewing", change it to "only messages I've read" or
+                    don't keep copies at all.
+                </p>
+                <p>Under Thunderbird, you can try to change IMAP timeout setting <code>mailnews.tcptimeout</code>)
+                    or avoid full mailbox sync: disable global search and indexer under advanced options and change
+                    Synchronization &amp; Storage options under Account Settings.
+                </p>
+                <p>
+                    <strong>Message deleted over IMAP still visible through OWA</strong>
+                </p>
+                <p>Delete action is not immediate with IMAP: you need to EXPUNGE the folder to actually
+                    delete a message.
+                </p>
+                <p>A workaround is to set <code>davmail.imapAutoExpunge=true</code> in DavMail to force immediate
+                    message expunge. Note that this makes DavMail non compliant to IMAP RFC.
+                </p>
+                <p>A workaround with Thunderbird is to set the property
+                    <code>mail.imap.expunge_after_delete=true</code>
+                </p>
+                <p>Note that you will also encounter this issue with clients missing IMAP MOVE extension support.
+                    As message move does not exist in basic IMAP, a move is a copy followed by a delete.</p>
+                <p>
+                    <strong>Duplicate messages in Sent folder</strong>
+                </p>
+                <p>Messages sent through DavMail appear twice in Sent folder when the IMAP client is setup
+                    to store sent messages on the server as Exchange already saves sent messages in this folder.
+                    Change IMAP client settings or change Save in Sent option in DavMail settings to avoid this issue.
+                </p>
+                <p>
+                    <strong>Sent messages encoding issue with Thunderbird</strong>
+                </p>
+                <p>If special characters appear replaced with ? in sent messages, set
+                    <code>mail.strictly_mime</code>
+                    advanced option.
+                    Go to Tools/Options/Advanced/General/Config Editor and look for a preference
+                    with name<code>mail.strictly_mime</code>, set value to
+                    <code>true</code>
+                    to send messages as quoted-printable.
+                </p>
+                <p>
+                    <strong>Access another user mailbox</strong>
+                </p>
+                <p>Either set base IMAP path in client settings to <code>/users/otheruser@company.com</code> or use the following username:
+                    <code>domain\user\otheruser@company.com</code> where otheruser@company.com it target mailbox
+                    name.
+                </p>
+
+            </subsection>
+
+            <subsection name="Build">
+                <p>
+                    <strong>How to build DavMail ?</strong>
+                </p>
+                <p>See
+                    <a href="build.html">Building DavMail from source</a>
+                </p>
+            </subsection>
+        </section>
+    </body>
+</document>
