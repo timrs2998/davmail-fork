@@ -1,0 +1,72 @@
+<?xml version="1.0"?>
+<document xmlns="http://maven.apache.org/XDOC/2.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/XDOC/2.0 http://maven.apache.org/xsd/xdoc-2.0.xsd">
+
+    <properties>
+        <title>DavMail POP/IMAP/SMTP/Caldav/Carddav/LDAP Exchange Gateway - OSX iCal setup</title>
+        <author email="mguessan@free.fr">Mickael Guessant</author>
+    </properties>
+
+    <body>
+
+        <section name="OSX iCal setup">
+            <p>DavMail Calendar support is now available, tested with Thunderbird/Lightning and Apple iCal.
+                This should also work with other Caldav clients.
+            </p>
+
+            <subsection name="Open iCal Preferences">
+                <p>On OSX Mavericks: Launch iCal and open Preferences in Calendar menu, then choose Accounts
+                    and click the plus sign to open account creation dialog:
+                </p>
+                <div style="width: 100%;text-align: center">
+                    <img src="images/osx/osx-caldav-account-create.png" alt=""/>
+                </div>
+                <p>Choose Add other Account, then Add a Caldav account:
+                </p>
+                <div style="width: 100%;text-align: center">
+                    <img src="images/osx/osx-caldav-account-create-caldav.png" alt=""/>
+                </div>
+                <p>Choose advanced account type, enter username and password, server address is DavMail
+                    machine (localhost in workstation mode), leave / in server path and enter DavMail
+                    Caldav port (default is 1080). Do not enable SSL unless you setup DavMail with a
+                    server certificate.
+                </p>
+                <div style="width: 100%;text-align: center">
+                    <img src="images/osx/osx-caldav-account-create-caldav-settings.png" alt=""/>
+                </div>
+                <p>On previous OSX versions, open iCal Preferences, go to the Accounts tab and click the plus button:
+                </p>
+                <div style="width: 100%;text-align: center">
+                    <img src="images/osxIcal1.png" alt=""/>
+                </div>
+
+                <p>On Snow Leopard, choose CalDAV as account type, enter you Exchange username and password and server
+                    address without path:
+                </p>
+                <code>http://localhost:1080
+                </code>
+                <p>On 10.5 choose a name, enter you Exchange username and password.
+                    Open the server options section to define the calendar URL (adjust port to your settings):
+                </p>
+                <code>http://localhost:1080/
+                </code>
+                <p>Note that iCal will build the full principal path automatically.
+                </p>
+                <div style="width: 100%;text-align: center">
+                    <img src="images/osxIcal2.png" alt=""/>
+                </div>
+
+                <p>Click Add, choose Connect Anyway in warning dialog:</p>
+                <div style="width: 100%;text-align: center">
+                    <img src="images/osxIcal3.png" alt=""/>
+                </div>
+
+                <p>Proceed to
+                    <a href="osxdirectorysetup.html">OSX directory setup</a>
+                    to enable attendee completion.
+                </p>
+            </subsection>
+        </section>
+    </body>
+</document>

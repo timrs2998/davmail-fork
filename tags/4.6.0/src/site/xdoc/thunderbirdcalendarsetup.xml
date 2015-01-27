@@ -1,0 +1,72 @@
+<?xml version="1.0"?>
+<document xmlns="http://maven.apache.org/XDOC/2.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/XDOC/2.0 http://maven.apache.org/xsd/xdoc-2.0.xsd">
+
+    <properties>
+        <title>DavMail POP/IMAP/SMTP/Caldav/Carddav/LDAP Exchange Gateway - Thunderbird calendar setup</title>
+        <author email="mguessan@free.fr">Mickael Guessant</author>
+    </properties>
+
+    <body>
+
+        <section name="Thunderbird calendar setup">
+            <p>DavMail Calendar support is now available, tested with Thunderbird/Lightning and Apple iCal.
+                This should also work with other Caldav clients.
+            </p>
+
+            <subsection name="Create a new network calendar">
+                <p>Obviously, you need to install the Thunderbird Lightning extension. You can
+                    then create a new network calendar:
+                </p>
+                <div style="width: 100%;text-align: center">
+                    <img src="images/thunderbirdCalendar1.png" alt=""/>
+                </div>
+
+                <p>Choose CalDav format and specify location (adjust port to your settings):</p>
+                <code>http://localhost:1080/users/mail@company.com/calendar
+                </code>
+                <p>Replace mail@company.com with actual user email address.
+                </p>
+                <div style="width: 100%;text-align: center">
+                    <img src="images/thunderbirdCalendar2.png" alt=""/>
+                </div>
+
+                <p>Choose a name, color and set the associated email address (as set in mail setup).
+                </p>
+                <p>Note that Caldav notifications will not work if this email address field is empty.</p>
+                <div style="width: 100%;text-align: center">
+                    <img src="images/thunderbirdCalendar3.png" alt=""/>
+                </div>
+
+
+                <p>Provide your credentials, login is Active Directory account name, i.e. domain\account
+                    or email address with Exchange 2007
+                </p>
+                <div style="width: 100%;text-align: center">
+                    <img src="images/thunderbirdCalendar4.png" alt=""/>
+                </div>
+
+
+                <p>Finish:
+                </p>
+                <div style="width: 100%;text-align: center">
+                    <img src="images/thunderbirdCalendar5.png" alt=""/>
+                </div>
+
+                <p>Lightning mail notifications are broken, activate Caldav notifications to outbox instead.
+                    Make sure calendar.caldav.sched.enabled is true in Thunderbird advanced settings.
+                </p>
+
+                <p>You may want to enable the (experimental) Lightning calendar cache feature to avoid
+                    the possibly long calendar load task delay on Thunderbird startup: double click
+                    on the calendar in Lightning left pane and activate cache. Restart Thunderbird.
+                </p>
+
+                <p>Proceed to
+                    <a href="thunderbirddirectorysetup.html">Thunderbird directory setup</a>
+                </p>
+            </subsection>
+        </section>
+    </body>
+</document>
