@@ -1,0 +1,45 @@
+<?xml version="1.0"?>
+<document xmlns="http://maven.apache.org/XDOC/2.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/XDOC/2.0 http://maven.apache.org/xsd/xdoc-2.0.xsd">
+
+    <properties>
+        <title>DavMail POP/IMAP/SMTP/Caldav/Carddav/LDAP Exchange Gateway - RoadMap</title>
+        <author email="mguessan@free.fr">Mickael Guessant</author>
+    </properties>
+
+    <body>
+
+        <section name="DavMail RoadMap">
+            <p>DavMail features are now almost complete, yet there remains a lot of place
+                for improvement. The following section lists the expected new features
+                and enhancements in next DavMail versions.
+            </p>
+            <subsection name="4.7">
+                <p>
+                    <strong>Next minor release</strong>
+                </p>
+                <ul>
+                    <li>Switch from registry to link on windows</li>
+                    <li>Implement split authentication</li>
+                    <li>Test windows install on seven without admin rights</li>
+                    <li>Implement IMAP subscribe/unsubscribe</li>
+                </ul>
+            </subsection>
+            <subsection name="4.x">
+                <p>
+                    <strong>Future version</strong>
+                </p>
+                <ul>
+                    <li>Improve EWS Caldav implementation</li>
+                    <li>Implement Caldav attachments</li>
+                    <li>Implement ActiveSync backend</li>
+                    <li>Implement EWS frontend for Exchange 2003 backend and Outlook 2011</li>
+                    <li>Implement custom authenticator interface to handle specific authentications
+                        (e.g. token based)
+                    </li>
+                </ul>
+            </subsection>
+        </section>
+    </body>
+</document>
